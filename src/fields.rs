@@ -1,5 +1,5 @@
 use serde::Serialize;
-use strum_macros::Display;
+use strum::Display;
 
 #[macro_export]
 macro_rules! fields {

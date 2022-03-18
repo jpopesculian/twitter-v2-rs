@@ -10,6 +10,11 @@ pub enum Error {
     Url(#[from] url::ParseError),
     #[error("Invalid Authorization header value: {_0}")]
     InvalidAuthorizationHeader(InvalidHeaderValue),
+    #[cfg(feature = "oauth2")]
+    #[error(transparent)]
+    Oauth2TokenError(
+        #[from] oauth2::basic::BasicRequestTokenError<oauth2::reqwest::Error<reqwest::Error>>,
+    ),
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;

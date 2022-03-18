@@ -1,20 +1,21 @@
-mod authentication;
+#[cfg(feature = "oauth2")]
+pub extern crate oauth2;
+
+mod authorization;
 mod data;
 mod error;
 mod expansions;
 mod fields;
 mod id;
-#[cfg(feature = "oauth2")]
-mod oauth2;
 mod query;
 mod requests;
 
-pub use authentication::*;
+pub use authorization::*;
 pub use data::*;
 pub use error::*;
 pub use requests::*;
 
-use authentication::Authorization;
+use authorization::Authorization;
 use expansions::TweetExpansion;
 use fields::Field;
 use id::ToId;

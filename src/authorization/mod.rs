@@ -1,9 +1,15 @@
+#[cfg(feature = "oauth2")]
+mod oauth2;
+
 use crate::error::{Error, Result};
 use async_trait::async_trait;
 use reqwest::header::HeaderValue;
 use reqwest::Request;
 use std::collections::BTreeSet;
 use std::fmt;
+
+#[cfg(feature = "oauth2")]
+pub use self::oauth2::*;
 
 #[async_trait]
 pub trait Authorization {

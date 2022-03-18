@@ -5,18 +5,24 @@ edition = "2021"
 
 [features]
 default = ["oauth2"]
+rustls-tls = ["oauth2/rustls-tls", "reqwest/rustls-tls"]
+native-tls = ["oauth2/native-tls", "reqwest/native-tls"]
 
 [dependencies]
 async-trait = "0.1"
 oauth1 = { version = "0.5", package = "oauth1-request" }
-oauth2 = { version = "4.1", optional = true, features = ["reqwest"] }
-reqwest = { version = "0.11", features = ["json"] }
+oauth2 = { version = "4.1", optional = true, default-features = false, features = ["reqwest"] }
+reqwest = { version = "0.11", default-features = false, features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_urlencoded = "0.7"
-strum_macros = "0.24"
+strum = { version = "0.24", features = ["derive"] }
 thiserror = "1.0"
 url = "2.2"
 
 [dev-dependencies]
+axum = "0.4.8"
 tokio = { version = "1.17.0", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.2.5", features = ["trace"] }
+tracing = "0.1.32"
+tracing-subscriber = { version = "0.3.9", features = ["env-filter"] }
