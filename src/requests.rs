@@ -26,12 +26,20 @@ pub struct DraftTweetReply {
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct DraftTweet {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub direct_message_deep_link: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub for_super_followers_only: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub geo: Option<DraftTweetGeo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub media: Option<DraftTweetMedia>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub poll: Option<DraftTweetPoll>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_tweet_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub reply_settings: Option<ReplySettings>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
 }

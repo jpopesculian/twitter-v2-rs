@@ -1,12 +1,9 @@
-use twitter_v2::{Authentication, DraftTweet, TwitterApi};
+use twitter_v2::{BearerToken, DraftTweet, TwitterApi};
 
-fn get_api() -> TwitterApi {
-    TwitterApi::new(Authentication::Oauth1a {
-        consumer_key: std::env::var("CONSUMER_KEY").unwrap(),
-        consumer_secret: std::env::var("CONSUMER_SECRET").unwrap(),
-        token: std::env::var("TOKEN").unwrap(),
-        secret: std::env::var("SECRET").unwrap(),
-    })
+fn get_api() -> TwitterApi<BearerToken> {
+    TwitterApi::new(BearerToken::new(
+        std::env::var("BEARER_TOKEN").expect("BEARER_TOKEN not found"),
+    ))
 }
 
 #[tokio::test]

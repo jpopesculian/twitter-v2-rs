@@ -7,28 +7,32 @@ mod id;
 mod query;
 mod requests;
 
-pub use authentication::Authentication;
+pub use authentication::*;
 pub use data::*;
 pub use error::*;
 pub use requests::*;
 
-use authentication::RequestAuth;
+use authentication::Authorization;
 use expansions::TweetExpansion;
 use fields::Field;
 use id::ToId;
 use query::{FieldsToQuery, ToQuery};
+use reqwest::header::AUTHORIZATION;
 use reqwest::Method;
 use reqwest::{Client, Url};
 
 #[derive(Clone, Debug)]
-pub struct TwitterApi {
+pub struct TwitterApi<A> {
     client: Client,
     base_url: Url,
-    auth: Authentication,
+    auth: A,
 }
 
-impl TwitterApi {
-    pub fn new(auth: Authentication) -> Self {
+impl<A> TwitterApi<A>
+where
+    A: Authorization,
+{
+    pub fn new(auth: A) -> Self {
         Self {
             client: Client::new(),
             base_url: Url::parse("https://api.twitter.com/2/").unwrap(),
@@ -42,7 +46,8 @@ impl TwitterApi {
 
     async fn send(&self, req: reqwest::RequestBuilder) -> Result<reqwest::Response> {
         let mut req = req.build()?;
-        req.authenticate(&self.auth)?;
+        let authorization = self.auth.header(&req).await?;
+        let _ = req.headers_mut().insert(AUTHORIZATION, authorization);
         Ok(self.client.execute(req).await?)
     }
 
@@ -86,7 +91,7 @@ impl TwitterApi {
             .await?;
         // .error_for_status()?;
         let body = res.text().await?;
-        println!("{:?}", body);
+        println!("{}", body);
         Ok(serde_json::from_str(&body).unwrap())
     }
 
