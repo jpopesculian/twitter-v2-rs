@@ -4,6 +4,8 @@ mod error;
 mod expansions;
 mod fields;
 mod id;
+#[cfg(feature = "oauth2")]
+mod oauth2;
 mod query;
 mod requests;
 
