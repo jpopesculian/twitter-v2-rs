@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["oauth2"]
+default = ["oauth2", "rustls-tls"]
 rustls-tls = ["oauth2/rustls-tls", "reqwest/rustls-tls"]
 native-tls = ["oauth2/native-tls", "reqwest/native-tls"]
 

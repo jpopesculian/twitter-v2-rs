@@ -74,7 +74,6 @@ async fn callback(
         (client, verifier)
     };
 
-    tracing::debug!("Code received {}", code.secret());
     // request oauth2 token
     let token = client
         .request_token(code, verifier)

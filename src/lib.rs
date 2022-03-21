@@ -1,3 +1,6 @@
+#[cfg(not(any(feature = "rustls-tls", feature = "native-tls")))]
+compile_error!("Either `rustls-tls` or `native-tls` feature must be selected");
+
 #[cfg(feature = "oauth2")]
 pub extern crate oauth2;
 
