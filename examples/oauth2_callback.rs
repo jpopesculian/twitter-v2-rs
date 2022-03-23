@@ -127,6 +127,20 @@ async fn revoke(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
     Ok::<_, (StatusCode, String)>("Token revoked!")
 }
 
+async fn debug_token(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
+    // get oauth token
+    let oauth_token = ctx
+        .lock()
+        .unwrap()
+        .token
+        .as_ref()
+        .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?
+        .clone();
+    // get underlying token
+    let serializable_token = oauth_token.token().await.clone();
+    Ok::<_, (StatusCode, String)>(Json(serializable_token))
+}
+
 #[tokio::main]
 async fn main() {
     // initialize tracing
@@ -159,6 +173,7 @@ async fn main() {
         .route("/callback", get(callback))
         .route("/tweets", get(tweets))
         .route("/revoke", get(revoke))
+        .route("/debug_token", get(debug_token))
         .layer(TraceLayer::new_for_http())
         .layer(Extension(Arc::new(Mutex::new(oauth_ctx))));
 

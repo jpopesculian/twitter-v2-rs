@@ -12,8 +12,8 @@ use reqwest::Request;
 use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
 use std::sync::Arc;
-use std::time::SystemTime;
 use strum::{Display, EnumString};
+use time::OffsetDateTime;
 use tokio::sync::{RwLock, RwLockReadGuard};
 use url::Url;
 
@@ -21,36 +21,52 @@ use url::Url;
 #[strum(serialize_all = "snake_case")]
 pub enum Scope {
     #[strum(serialize = "tweet.read")]
+    #[serde(rename = "tweet.read")]
     TweetRead,
     #[strum(serialize = "tweet.write")]
+    #[serde(rename = "tweet.write")]
     TweetWrite,
     #[strum(serialize = "tweet.moderate.write")]
+    #[serde(rename = "tweet.moderate.write")]
     TweetModerateWrite,
     #[strum(serialize = "users.read")]
+    #[serde(rename = "users.read")]
     UsersRead,
     #[strum(serialize = "follows.read")]
+    #[serde(rename = "follows.read")]
     FollowsRead,
     #[strum(serialize = "follows.write")]
+    #[serde(rename = "follows.write")]
     FollowsWrite,
     #[strum(serialize = "offline.access")]
+    #[serde(rename = "offline.access")]
     OfflineAccess,
     #[strum(serialize = "space.read")]
+    #[serde(rename = "space.read")]
     SpaceRead,
     #[strum(serialize = "mute.read")]
+    #[serde(rename = "mute.read")]
     MuteRead,
     #[strum(serialize = "mute.write")]
+    #[serde(rename = "mute.write")]
     MuteWrite,
     #[strum(serialize = "like.read")]
+    #[serde(rename = "like.read")]
     LikeRead,
     #[strum(serialize = "like.write")]
+    #[serde(rename = "like.write")]
     LikeWrite,
     #[strum(serialize = "list.read")]
+    #[serde(rename = "list.read")]
     ListRead,
     #[strum(serialize = "list.write")]
+    #[serde(rename = "list.write")]
     ListWrite,
     #[strum(serialize = "block.read")]
+    #[serde(rename = "block.read")]
     BlockRead,
     #[strum(serialize = "block.write")]
+    #[serde(rename = "block.write")]
     BlockWrite,
 }
 
@@ -129,7 +145,8 @@ impl Oauth2Client {
 pub struct Oauth2Token {
     access_token: AccessToken,
     refresh_token: Option<RefreshToken>,
-    expires: SystemTime,
+    #[serde(with = "time::serde::rfc3339")]
+    expires: OffsetDateTime,
     scopes: Vec<Scope>,
 }
 
@@ -140,11 +157,11 @@ impl Oauth2Token {
     pub fn refresh_token(&self) -> Option<&RefreshToken> {
         self.refresh_token.as_ref()
     }
-    pub fn expires(&self) -> SystemTime {
+    pub fn expires(&self) -> OffsetDateTime {
         self.expires
     }
     pub fn is_expired(&self) -> bool {
-        self.expires < SystemTime::now()
+        self.expires < OffsetDateTime::now_utc()
     }
     pub fn scopes(&self) -> &[Scope] {
         &self.scopes
@@ -164,7 +181,7 @@ impl TryFrom<BasicTokenResponse> for Oauth2Token {
         Ok(Self {
             access_token: token.access_token().clone(),
             refresh_token: token.refresh_token().cloned(),
-            expires: SystemTime::now()
+            expires: OffsetDateTime::now_utc()
                 + token.expires_in().ok_or_else(|| {
                     Error::Oauth2TokenError(BasicRequestTokenError::Other(
                         "Missing expiration".to_string(),
