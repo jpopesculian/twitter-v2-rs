@@ -1,10 +1,13 @@
 use super::Authorization;
 use crate::error::{Error, Result};
+use async_trait::async_trait;
 use oauth2::basic::{BasicClient, BasicRequestTokenError};
 use oauth2::{
     AccessToken, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge,
     PkceCodeVerifier, RedirectUrl, RefreshToken, RevocationUrl, TokenResponse, TokenUrl,
 };
+use reqwest::header::HeaderValue;
+use reqwest::Request;
 use std::time::SystemTime;
 use strum::{Display, EnumString};
 use url::Url;
@@ -155,5 +158,14 @@ impl Oauth2Token {
     }
     pub fn scopes(&self) -> &[Scope] {
         &self.scopes
+    }
+}
+
+#[async_trait]
+impl Authorization for Oauth2Token {
+    async fn header(&self, _request: &Request) -> Result<HeaderValue> {
+        format!("Bearer {}", self.access_token().secret())
+            .parse()
+            .map_err(Error::InvalidAuthorizationHeader)
     }
 }

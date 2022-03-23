@@ -11,7 +11,10 @@ use std::sync::{Arc, Mutex};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::prelude::*;
 
-use twitter_v2::oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier};
+use twitter_v2::{
+    oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier},
+    Tweet, TwitterApi,
+};
 use twitter_v2::{Oauth2Client, Oauth2Token, Scope};
 
 pub struct Oauth2Ctx {
@@ -86,6 +89,21 @@ async fn callback(
     Ok(Redirect::to("/tweets".parse().unwrap()))
 }
 
+async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
+    let oauth_token = ctx
+        .lock()
+        .unwrap()
+        .token
+        .clone()
+        .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?;
+    let api = TwitterApi::new(oauth_token);
+    let tweet = api
+        .get_tweet(20, None, None)
+        .await
+        .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
+    Ok::<_, (StatusCode, String)>(Json(tweet.data))
+}
+
 #[tokio::main]
 async fn main() {
     // initialize tracing
@@ -116,6 +134,7 @@ async fn main() {
     let app = Router::new()
         .route("/login", get(login))
         .route("/callback", get(callback))
+        .route("/tweets", get(tweets))
         .layer(TraceLayer::new_for_http())
         .layer(Extension(Arc::new(Mutex::new(oauth_ctx))));
 

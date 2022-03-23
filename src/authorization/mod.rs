@@ -33,7 +33,7 @@ impl fmt::Debug for BearerToken {
 
 #[async_trait]
 impl Authorization for BearerToken {
-    async fn header(&self, request: &Request) -> Result<HeaderValue> {
+    async fn header(&self, _request: &Request) -> Result<HeaderValue> {
         format!("Bearer {}", self.0)
             .parse()
             .map_err(Error::InvalidAuthorizationHeader)

@@ -80,7 +80,7 @@ where
         id: impl ToId,
         fields: Option<&[Field]>,
         expansions: Option<&[TweetExpansion]>,
-    ) -> ApiResult<Vec<Tweet>> {
+    ) -> ApiResult<Tweet> {
         let mut req = self.request(Method::GET, &format!("tweets/{id}"))?;
         if let Some(fields) = fields {
             req = req.query(&fields.to_fields_query());
