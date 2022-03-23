@@ -13,7 +13,7 @@ use tracing_subscriber::prelude::*;
 
 use twitter_v2::{
     oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier},
-    Tweet, TwitterApi,
+    TwitterApi,
 };
 use twitter_v2::{Oauth2Client, Oauth2Token, Scope};
 
@@ -104,6 +104,20 @@ async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
     Ok::<_, (StatusCode, String)>(Json(tweet.data))
 }
 
+async fn revoke(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
+    let oauth_token = ctx
+        .lock()
+        .unwrap()
+        .token
+        .clone()
+        .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?;
+    oauth_token
+        .revoke()
+        .await
+        .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
+    Ok::<_, (StatusCode, String)>("Token revoked!")
+}
+
 #[tokio::main]
 async fn main() {
     // initialize tracing
@@ -135,6 +149,7 @@ async fn main() {
         .route("/login", get(login))
         .route("/callback", get(callback))
         .route("/tweets", get(tweets))
+        .route("/revoke", get(revoke))
         .layer(TraceLayer::new_for_http())
         .layer(Extension(Arc::new(Mutex::new(oauth_ctx))));
 

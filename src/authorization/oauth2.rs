@@ -4,7 +4,8 @@ use async_trait::async_trait;
 use oauth2::basic::{BasicClient, BasicRequestTokenError};
 use oauth2::{
     AccessToken, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge,
-    PkceCodeVerifier, RedirectUrl, RefreshToken, RevocationUrl, TokenResponse, TokenUrl,
+    PkceCodeVerifier, RedirectUrl, RefreshToken, RevocationUrl, StandardRevocableToken,
+    TokenResponse, TokenUrl,
 };
 use reqwest::header::HeaderValue;
 use reqwest::Request;
@@ -98,11 +99,7 @@ impl Oauth2Client {
             .exchange_code(code)
             .set_pkce_verifier(verifier)
             .request_async(oauth2::reqwest::async_http_client)
-            .await
-            .map_err(|err| {
-                println!("{:?}", err);
-                Error::from(err)
-            })?;
+            .await?;
         Ok(Oauth2Token {
             oauth_client: self.clone(),
             access_token: res.access_token().clone(),
@@ -158,6 +155,22 @@ impl Oauth2Token {
     }
     pub fn scopes(&self) -> &[Scope] {
         &self.scopes
+    }
+    fn revokable_token(&self) -> StandardRevocableToken {
+        if let Some(refresh_token) = self.refresh_token.as_ref() {
+            StandardRevocableToken::RefreshToken(refresh_token.clone())
+        } else {
+            StandardRevocableToken::AccessToken(self.access_token.clone())
+        }
+    }
+    pub async fn revoke(&self) -> Result<()> {
+        Ok(self
+            .oauth_client
+            .0
+            .revoke_token(self.revokable_token())
+            .unwrap()
+            .request_async(oauth2::reqwest::async_http_client)
+            .await?)
     }
 }
 

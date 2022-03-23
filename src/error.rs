@@ -13,7 +13,20 @@ pub enum Error {
     #[cfg(feature = "oauth2")]
     #[error(transparent)]
     Oauth2TokenError(
-        #[from] oauth2::basic::BasicRequestTokenError<oauth2::reqwest::Error<reqwest::Error>>,
+        #[from]
+        oauth2::RequestTokenError<
+            oauth2::reqwest::Error<reqwest::Error>,
+            oauth2::basic::BasicErrorResponse,
+        >,
+    ),
+    #[cfg(feature = "oauth2")]
+    #[error(transparent)]
+    Oauth2RevocationError(
+        #[from]
+        oauth2::RequestTokenError<
+            oauth2::reqwest::Error<reqwest::Error>,
+            oauth2::basic::BasicRevocationErrorResponse,
+        >,
     ),
 }
 
