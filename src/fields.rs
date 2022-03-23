@@ -1,4 +1,3 @@
-use serde::Serialize;
 use strum::Display;
 
 #[macro_export]

@@ -1,7 +1,7 @@
 use super::Authorization;
 use crate::error::{Error, Result};
 use async_trait::async_trait;
-use oauth2::basic::{BasicClient, BasicRequestTokenError};
+use oauth2::basic::{BasicClient, BasicRequestTokenError, BasicTokenResponse};
 use oauth2::{
     AccessToken, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge,
     PkceCodeVerifier, RedirectUrl, RefreshToken, RevocationUrl, StandardRevocableToken,
@@ -9,11 +9,15 @@ use oauth2::{
 };
 use reqwest::header::HeaderValue;
 use reqwest::Request;
+use serde::{Deserialize, Serialize};
+use std::convert::{TryFrom, TryInto};
+use std::sync::Arc;
 use std::time::SystemTime;
 use strum::{Display, EnumString};
+use tokio::sync::{RwLock, RwLockReadGuard};
 use url::Url;
 
-#[derive(Copy, Clone, Debug, EnumString, Display)]
+#[derive(Copy, Clone, Debug, EnumString, Display, Serialize, Deserialize)]
 #[strum(serialize_all = "snake_case")]
 pub enum Scope {
     #[strum(serialize = "tweet.read")]
@@ -93,47 +97,36 @@ impl Oauth2Client {
         &self,
         code: AuthorizationCode,
         verifier: PkceCodeVerifier,
-    ) -> Result<Oauth2Token> {
+    ) -> Result<RefreshableOauth2Token> {
         let res = self
             .0
             .exchange_code(code)
             .set_pkce_verifier(verifier)
             .request_async(oauth2::reqwest::async_http_client)
             .await?;
-        Ok(Oauth2Token {
-            oauth_client: self.clone(),
-            access_token: res.access_token().clone(),
-            refresh_token: res.refresh_token().cloned(),
-            expires: SystemTime::now()
-                + res.expires_in().ok_or_else(|| {
-                    Error::Oauth2TokenError(BasicRequestTokenError::Other(
-                        "Missing expiration".to_string(),
-                    ))
-                })?,
-            scopes: res
-                .scopes()
-                .ok_or_else(|| {
-                    Error::Oauth2TokenError(BasicRequestTokenError::Other(
-                        "Missing scopes".to_string(),
-                    ))
-                })?
-                .iter()
-                .map(|s| {
-                    s.parse().map_err(|err| {
-                        Error::Oauth2TokenError(BasicRequestTokenError::Other(format!(
-                            "Invalid scope: {}",
-                            err
-                        )))
-                    })
-                })
-                .collect::<Result<Vec<_>>>()?,
-        })
+        Ok(RefreshableOauth2Token::new(self.clone(), res.try_into()?))
+    }
+
+    pub async fn revoke_token(&self, token: StandardRevocableToken) -> Result<()> {
+        Ok(self
+            .0
+            .revoke_token(token)
+            .unwrap()
+            .request_async(oauth2::reqwest::async_http_client)
+            .await?)
+    }
+
+    pub async fn refresh_token(&self, token: &RefreshToken) -> Result<BasicTokenResponse> {
+        Ok(self
+            .0
+            .exchange_refresh_token(token)
+            .request_async(oauth2::reqwest::async_http_client)
+            .await?)
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Oauth2Token {
-    oauth_client: Oauth2Client,
     access_token: AccessToken,
     refresh_token: Option<RefreshToken>,
     expires: SystemTime,
@@ -156,21 +149,45 @@ impl Oauth2Token {
     pub fn scopes(&self) -> &[Scope] {
         &self.scopes
     }
-    fn revokable_token(&self) -> StandardRevocableToken {
+    pub fn revokable_token(&self) -> StandardRevocableToken {
         if let Some(refresh_token) = self.refresh_token.as_ref() {
             StandardRevocableToken::RefreshToken(refresh_token.clone())
         } else {
             StandardRevocableToken::AccessToken(self.access_token.clone())
         }
     }
-    pub async fn revoke(&self) -> Result<()> {
-        Ok(self
-            .oauth_client
-            .0
-            .revoke_token(self.revokable_token())
-            .unwrap()
-            .request_async(oauth2::reqwest::async_http_client)
-            .await?)
+}
+
+impl TryFrom<BasicTokenResponse> for Oauth2Token {
+    type Error = Error;
+    fn try_from(token: BasicTokenResponse) -> Result<Self, Self::Error> {
+        Ok(Self {
+            access_token: token.access_token().clone(),
+            refresh_token: token.refresh_token().cloned(),
+            expires: SystemTime::now()
+                + token.expires_in().ok_or_else(|| {
+                    Error::Oauth2TokenError(BasicRequestTokenError::Other(
+                        "Missing expiration".to_string(),
+                    ))
+                })?,
+            scopes: token
+                .scopes()
+                .ok_or_else(|| {
+                    Error::Oauth2TokenError(BasicRequestTokenError::Other(
+                        "Missing scopes".to_string(),
+                    ))
+                })?
+                .iter()
+                .map(|s| {
+                    s.parse().map_err(|err| {
+                        Error::Oauth2TokenError(BasicRequestTokenError::Other(format!(
+                            "Invalid scope: {}",
+                            err
+                        )))
+                    })
+                })
+                .collect::<Result<Vec<_>>>()?,
+        })
     }
 }
 
@@ -180,5 +197,55 @@ impl Authorization for Oauth2Token {
         format!("Bearer {}", self.access_token().secret())
             .parse()
             .map_err(Error::InvalidAuthorizationHeader)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct RefreshableOauth2Token {
+    oauth_client: Oauth2Client,
+    token: Arc<RwLock<Oauth2Token>>,
+}
+
+impl RefreshableOauth2Token {
+    pub fn new(oauth_client: Oauth2Client, token: Oauth2Token) -> Self {
+        Self {
+            oauth_client,
+            token: Arc::new(RwLock::new(token)),
+        }
+    }
+
+    pub async fn token(&self) -> RwLockReadGuard<'_, Oauth2Token> {
+        self.token.read().await
+    }
+
+    pub async fn revoke(&self) -> Result<()> {
+        self.oauth_client
+            .revoke_token(self.token.read().await.revokable_token())
+            .await
+    }
+
+    pub async fn refresh(&self) -> Result<()> {
+        let mut token = self.token.write().await;
+        let res = self
+            .oauth_client
+            .refresh_token(token.refresh_token.as_ref().ok_or(Error::NoRefreshToken)?)
+            .await?;
+        *token = res.try_into()?;
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl Authorization for RefreshableOauth2Token {
+    async fn header(&self, request: &Request) -> Result<HeaderValue> {
+        let mut token = self.token.write().await;
+        if token.is_expired() {
+            let res = self
+                .oauth_client
+                .refresh_token(token.refresh_token.as_ref().ok_or(Error::NoRefreshToken)?)
+                .await?;
+            *token = res.try_into()?;
+        }
+        token.header(request).await
     }
 }

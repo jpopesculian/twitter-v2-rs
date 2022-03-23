@@ -2,7 +2,7 @@ use axum::{
     extract::{Extension, Query},
     http::StatusCode,
     response::{IntoResponse, Redirect},
-    routing::{get, post},
+    routing::get,
     Json, Router,
 };
 use serde::Deserialize;
@@ -15,13 +15,13 @@ use twitter_v2::{
     oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier},
     TwitterApi,
 };
-use twitter_v2::{Oauth2Client, Oauth2Token, Scope};
+use twitter_v2::{Oauth2Client, RefreshableOauth2Token, Scope};
 
 pub struct Oauth2Ctx {
     client: Oauth2Client,
     verifier: Option<PkceCodeVerifier>,
     state: Option<CsrfToken>,
-    token: Option<Oauth2Token>,
+    token: Option<RefreshableOauth2Token>,
 }
 
 async fn login(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
@@ -31,7 +31,12 @@ async fn login(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRes
     // create authorization url
     let (url, state) = ctx.client.auth_url(
         challenge,
-        [Scope::TweetRead, Scope::TweetWrite, Scope::UsersRead],
+        [
+            Scope::TweetRead,
+            Scope::TweetWrite,
+            Scope::UsersRead,
+            Scope::OfflineAccess,
+        ],
     );
     // set context for reference in callback
     ctx.verifier = Some(verifier);
@@ -82,21 +87,23 @@ async fn callback(
         .request_token(code, verifier)
         .await
         .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
-    tracing::debug!("Token received {}", token.access_token().secret());
-    // // set context for use with twitter API
+    // set context for use with twitter API
     ctx.lock().unwrap().token = Some(token);
 
     Ok(Redirect::to("/tweets".parse().unwrap()))
 }
 
 async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
+    // get oauth token
     let oauth_token = ctx
         .lock()
         .unwrap()
         .token
-        .clone()
-        .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?;
+        .as_ref()
+        .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?
+        .clone();
     let api = TwitterApi::new(oauth_token);
+    // get tweet by id
     let tweet = api
         .get_tweet(20, None, None)
         .await
@@ -105,12 +112,14 @@ async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
 }
 
 async fn revoke(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
+    // get oauth token
     let oauth_token = ctx
         .lock()
         .unwrap()
         .token
         .clone()
         .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?;
+    // revoke token
     oauth_token
         .revoke()
         .await

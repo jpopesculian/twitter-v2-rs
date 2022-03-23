@@ -28,6 +28,9 @@ pub enum Error {
             oauth2::basic::BasicRevocationErrorResponse,
         >,
     ),
+    #[cfg(feature = "oauth2")]
+    #[error("No refresh token found. Try using the `offline.access` scope")]
+    NoRefreshToken,
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
