@@ -5,7 +5,7 @@ use crate::data::{Deleted, Tweet};
 use crate::error::Result;
 use crate::meta::TimelineMeta;
 use crate::query::{get_req_builder, ToId, ToQuery};
-use crate::requests::DraftTweet;
+use crate::TweetBuilder;
 use reqwest::Method;
 
 get_req_builder! {
@@ -78,9 +78,8 @@ where
             self.request(Method::GET, &format!("users/{user_id}/mentions"))?,
         ))
     }
-    pub async fn post_tweet(&self, tweet: &DraftTweet) -> ApiResult<Tweet, Option<()>> {
-        self.send(self.request(Method::POST, "tweets")?.json(tweet))
-            .await
+    pub fn post_tweet(&self) -> TweetBuilder<A> {
+        TweetBuilder::new(self, self.request(Method::POST, "tweets").unwrap())
     }
 
     pub async fn delete_tweet(&self, id: impl ToId) -> ApiResult<Deleted, Option<()>> {

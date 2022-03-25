@@ -4,7 +4,6 @@ use crate::data::User;
 use crate::error::Result;
 use crate::query::{get_req_builder, ToId, ToQuery};
 use reqwest::Method;
-use std::fmt::Display;
 
 get_req_builder! {
 pub struct GetUsersRequestBuilder {
@@ -36,7 +35,7 @@ where
     }
     pub fn get_users_by_usernames(
         &self,
-        usernames: impl IntoIterator<Item = impl Display>,
+        usernames: impl IntoIterator<Item = impl ToString>,
     ) -> Result<GetUsersRequestBuilder<A, Vec<User>, Option<()>>> {
         Ok(GetUsersRequestBuilder::new(
             self,
@@ -46,11 +45,14 @@ where
     }
     pub fn get_user_by_username(
         &self,
-        username: impl Display,
+        username: impl ToString,
     ) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {
         Ok(GetUsersRequestBuilder::new(
             self,
-            self.request(Method::GET, &format!("users/by/username/{username}"))?,
+            self.request(
+                Method::GET,
+                &format!("users/by/username/{}", username.to_string()),
+            )?,
         ))
     }
     pub fn get_users_me(&self) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {

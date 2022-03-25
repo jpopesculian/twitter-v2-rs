@@ -136,6 +136,16 @@ macro_rules! get_req_builder {
                 self.client.send(self.req).await
             }
         }
+
+        impl<A, T, M> Clone for $class<A, T, M> {
+            fn clone(&self) -> Self {
+                Self {
+                    client: self.client.clone(),
+                    req: self.req.try_clone().unwrap(),
+                    return_ty: Default::default()
+                }
+            }
+        }
     };
 }
 
