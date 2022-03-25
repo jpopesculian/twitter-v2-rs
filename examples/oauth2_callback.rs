@@ -105,7 +105,9 @@ async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
     let api = TwitterApi::new(oauth_token);
     // get tweet by id
     let tweet = api
-        .get_tweet(20, None, None)
+        .get_tweet(20)
+        .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?
+        .send()
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
     Ok::<_, (StatusCode, String)>(Json(tweet.data))

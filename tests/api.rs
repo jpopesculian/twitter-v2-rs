@@ -14,7 +14,9 @@ fn rand_str(len: usize) -> String {
 #[tokio::test]
 async fn get_tweets() {
     let res = get_api()
-        .get_tweets(&[1261326399320715264, 1278347468690915330], None, None)
+        .get_tweets(&[1261326399320715264, 1278347468690915330])
+        .unwrap()
+        .send()
         .await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
     assert_eq!(res.unwrap().data.len(), 2);
@@ -22,7 +24,11 @@ async fn get_tweets() {
 
 #[tokio::test]
 async fn get_tweet() {
-    let res = get_api().get_tweet(1261326399320715264, None, None).await;
+    let res = get_api()
+        .get_tweet(1261326399320715264)
+        .unwrap()
+        .send()
+        .await;
     assert!(res.is_ok(), "{}", res.unwrap_err())
 }
 
@@ -46,7 +52,45 @@ async fn manage_tweet() {
 }
 
 #[tokio::test]
+async fn get_users() {
+    let res = get_api()
+        .get_users(&[2244994945, 6253282])
+        .unwrap()
+        .send()
+        .await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+    assert_eq!(res.unwrap().data.len(), 2);
+}
+
+#[tokio::test]
+async fn get_user() {
+    let res = get_api().get_user(2244994945).unwrap().send().await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+}
+
+#[tokio::test]
+async fn get_users_by() {
+    let res = get_api()
+        .get_users_by_usernames(&["TwitterDev", "Twitter"])
+        .unwrap()
+        .send()
+        .await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+    assert_eq!(res.unwrap().data.len(), 2);
+}
+
+#[tokio::test]
+async fn get_user_by_username() {
+    let res = get_api()
+        .get_user_by_username("TwitterDev")
+        .unwrap()
+        .send()
+        .await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+}
+
+#[tokio::test]
 async fn get_users_me() {
-    let res = get_api().get_users_me().await;
+    let res = get_api().get_users_me().unwrap().send().await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
 }

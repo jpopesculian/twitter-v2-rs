@@ -1,6 +1,3 @@
-use crate::fields::Field;
-use serde::Serialize;
-
 pub(crate) trait ToQuery {
     fn to_query(self, query: &str) -> Vec<(&str, String)>;
 }
@@ -24,95 +21,89 @@ where
     }
 }
 
-#[derive(Default, Serialize)]
-pub(crate) struct FieldsQuery {
-    #[serde(rename = "media.fields")]
-    media: Option<String>,
-    #[serde(rename = "place.fields")]
-    place: Option<String>,
-    #[serde(rename = "poll.fields")]
-    poll: Option<String>,
-    #[serde(rename = "tweet.fields")]
-    tweet: Option<String>,
-    #[serde(rename = "user.fields")]
-    user: Option<String>,
+macro_rules! get_req_builder_arg {
+    (media_fields) => {
+        pub fn media_fields(
+            mut self,
+            fields: impl IntoIterator<Item = $crate::MediaField>,
+        ) -> Self {
+            self.req = self.req.query(&fields.to_query("media.fields"));
+            self
+        }
+    };
+    (place_fields) => {
+        pub fn place_fields(
+            mut self,
+            fields: impl IntoIterator<Item = $crate::PlaceField>,
+        ) -> Self {
+            self.req = self.req.query(&fields.to_query("place.fields"));
+            self
+        }
+    };
+    (poll_fields) => {
+        pub fn poll_fields(mut self, fields: impl IntoIterator<Item = $crate::PollField>) -> Self {
+            self.req = self.req.query(&fields.to_query("poll.fields"));
+            self
+        }
+    };
+    (user_fields) => {
+        pub fn user_fields(mut self, fields: impl IntoIterator<Item = $crate::UserField>) -> Self {
+            self.req = self.req.query(&fields.to_query("user.fields"));
+            self
+        }
+    };
+    (tweet_fields) => {
+        pub fn tweet_fields(
+            mut self,
+            fields: impl IntoIterator<Item = $crate::TweetField>,
+        ) -> Self {
+            self.req = self.req.query(&fields.to_query("tweet.fields"));
+            self
+        }
+    };
+    (tweet_expansions) => {
+        pub fn expansions(
+            mut self,
+            expansions: impl IntoIterator<Item = $crate::TweetExpansion>,
+        ) -> Self {
+            self.req = self.req.query(&expansions.to_query("expansions"));
+            self
+        }
+    };
+    (user_expansions) => {
+        pub fn expansions(
+            mut self,
+            expansions: impl IntoIterator<Item = $crate::UserExpansion>,
+        ) -> Self {
+            self.req = self.req.query(&expansions.to_query("expansions"));
+            self
+        }
+    };
 }
 
-impl<'a> FromIterator<&'a Field> for FieldsQuery {
-    fn from_iter<T: IntoIterator<Item = &'a Field>>(iter: T) -> Self {
-        let mut fields = FieldsQuery::default();
-        for field in iter {
-            match field {
-                Field::Media(media) => {
-                    if fields.media.is_none() {
-                        fields.media = Some(String::new());
-                    }
-                    let field = fields.media.as_mut().unwrap();
-                    field.push_str(&media.to_string());
-                    field.push(',');
-                }
-                Field::Place(place) => {
-                    if fields.place.is_none() {
-                        fields.place = Some(String::new());
-                    }
-                    let field = fields.place.as_mut().unwrap();
-                    field.push_str(&place.to_string());
-                    field.push(',');
-                }
-                Field::Poll(poll) => {
-                    if fields.poll.is_none() {
-                        fields.poll = Some(String::new());
-                    }
-                    let field = fields.poll.as_mut().unwrap();
-                    field.push_str(&poll.to_string());
-                    field.push(',');
-                }
-                Field::Tweet(tweet) => {
-                    if fields.tweet.is_none() {
-                        fields.tweet = Some(String::new());
-                    }
-                    let field = fields.tweet.as_mut().unwrap();
-                    field.push_str(&tweet.to_string());
-                    field.push(',');
-                }
-                Field::User(user) => {
-                    if fields.user.is_none() {
-                        fields.user = Some(String::new());
-                    }
-                    let field = fields.user.as_mut().unwrap();
-                    field.push_str(&user.to_string());
-                    field.push(',');
-                }
+macro_rules! get_req_builder {
+    ($vis:vis struct $class:ident { $($optional_arg:tt),* }) => {
+        $vis struct $class<A, T> {
+            client: $crate::TwitterApi<A>,
+            req: reqwest::RequestBuilder,
+            return_ty: std::marker::PhantomData<T>
+        }
+
+        impl<A, T> $class<A, T>
+        where
+            A: $crate::Authorization,
+            T: serde::de::DeserializeOwned
+        {
+            fn new(client: &$crate::TwitterApi<A>, req: reqwest::RequestBuilder) -> Self {
+                Self { client: client.clone(), req, return_ty: Default::default() }
+            }
+            $($crate::query::get_req_builder_arg! { $optional_arg })*
+            pub async fn send(self) -> $crate::ApiResult<T> {
+                self.client.send(self.req).await
             }
         }
-        if let Some(field) = fields.media.as_mut() {
-            let _ = field.pop();
-        }
-        if let Some(field) = fields.place.as_mut() {
-            let _ = field.pop();
-        }
-        if let Some(field) = fields.poll.as_mut() {
-            let _ = field.pop();
-        }
-        if let Some(field) = fields.tweet.as_mut() {
-            let _ = field.pop();
-        }
-        if let Some(field) = fields.user.as_mut() {
-            let _ = field.pop();
-        }
-        fields
-    }
+    };
 }
 
-pub(crate) trait FieldsToQuery {
-    fn to_fields_query(self) -> FieldsQuery;
-}
-
-impl<'a, T> FieldsToQuery for T
-where
-    T: IntoIterator<Item = &'a Field>,
-{
-    fn to_fields_query(self) -> FieldsQuery {
-        self.into_iter().collect()
-    }
-}
+pub(crate) use get_req_builder;
+pub(crate) use get_req_builder_arg;
