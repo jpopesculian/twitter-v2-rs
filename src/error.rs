@@ -1,13 +1,17 @@
+use crate::api_result::ApiError;
 use reqwest::header::InvalidHeaderValue;
-use serde::Deserialize;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
     #[error(transparent)]
+    Api(#[from] ApiError),
+    #[error(transparent)]
     Request(#[from] reqwest::Error),
     #[error(transparent)]
     Url(#[from] url::ParseError),
+    #[error(transparent)]
+    Json(#[from] serde_json::Error),
     #[error("Invalid Authorization header value: {_0}")]
     InvalidAuthorizationHeader(InvalidHeaderValue),
     #[cfg(feature = "oauth2")]
@@ -34,14 +38,3 @@ pub enum Error {
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
-
-#[derive(Deserialize, Debug)]
-pub struct ApiResponseMeta {}
-
-#[derive(Deserialize, Debug)]
-pub struct ApiResponse<T> {
-    pub data: T,
-    pub meta: Option<ApiResponseMeta>,
-}
-
-pub type ApiResult<T> = Result<ApiResponse<T>>;

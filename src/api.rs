@@ -1,6 +1,7 @@
+use crate::api_result::{ApiResponseExt, ApiResult};
 use crate::authorization::Authorization;
 use crate::data::{Tweet, User};
-use crate::error::{ApiResult, Result};
+use crate::error::Result;
 use crate::expansions::TweetExpansion;
 use crate::fields::Field;
 use crate::id::ToId;
@@ -9,6 +10,7 @@ use crate::requests::DraftTweet;
 use reqwest::header::AUTHORIZATION;
 use reqwest::Method;
 use reqwest::{Client, Url};
+use serde::de::DeserializeOwned;
 
 #[derive(Clone, Debug)]
 pub struct TwitterApi<A> {
@@ -33,11 +35,11 @@ where
         Ok(self.client.request(method, self.base_url.join(url)?))
     }
 
-    async fn send(&self, req: reqwest::RequestBuilder) -> Result<reqwest::Response> {
+    async fn send<T: DeserializeOwned>(&self, req: reqwest::RequestBuilder) -> ApiResult<T> {
         let mut req = req.build()?;
         let authorization = self.auth.header(&req).await?;
         let _ = req.headers_mut().insert(AUTHORIZATION, authorization);
-        Ok(self.client.execute(req).await?)
+        self.client.execute(req).await?.api_json().await
     }
 
     pub async fn get_tweets(
@@ -55,7 +57,7 @@ where
         if let Some(expansions) = expansions {
             req = req.query(&expansions.to_query("expansions"));
         }
-        Ok(self.send(req).await?.error_for_status()?.json().await?)
+        self.send(req).await
     }
 
     pub async fn get_tweet(
@@ -71,24 +73,15 @@ where
         if let Some(expansions) = expansions {
             req = req.query(&expansions.to_query("expansions"));
         }
-        Ok(self.send(req).await?.error_for_status()?.json().await?)
+        self.send(req).await
     }
 
     pub async fn post_tweet(&self, tweet: &DraftTweet) -> ApiResult<Tweet> {
-        Ok(self
-            .send(self.request(Method::POST, "tweets")?.json(tweet))
-            .await?
-            .error_for_status()?
-            .json()
-            .await?)
+        self.send(self.request(Method::POST, "tweets")?.json(tweet))
+            .await
     }
 
     pub async fn get_users_me(&self) -> ApiResult<User> {
-        Ok(self
-            .send(self.request(Method::GET, "users/me")?)
-            .await?
-            .error_for_status()?
-            .json()
-            .await?)
+        self.send(self.request(Method::GET, "users/me")?).await
     }
 }
