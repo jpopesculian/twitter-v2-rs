@@ -69,6 +69,12 @@ async fn get_user() {
 }
 
 #[tokio::test]
+async fn get_user_tweets() {
+    let res = get_api().get_user_tweets(2244994945).unwrap().send().await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+}
+
+#[tokio::test]
 async fn get_users_by() {
     let res = get_api()
         .get_users_by_usernames(&["TwitterDev", "Twitter"])

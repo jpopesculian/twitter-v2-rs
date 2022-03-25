@@ -33,7 +33,10 @@ where
         Ok(self.client.request(method, self.base_url.join(url)?))
     }
 
-    pub async fn send<T: DeserializeOwned>(&self, req: reqwest::RequestBuilder) -> ApiResult<T> {
+    pub async fn send<T: DeserializeOwned, M: DeserializeOwned>(
+        &self,
+        req: reqwest::RequestBuilder,
+    ) -> ApiResult<T, M> {
         let mut req = req.build()?;
         let authorization = self.auth.header(&req).await?;
         let _ = req.headers_mut().insert(AUTHORIZATION, authorization);

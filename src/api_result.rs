@@ -8,9 +8,9 @@ use std::fmt;
 pub struct ApiResponseMeta {}
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct ApiResponse<T> {
+pub struct ApiResponse<T, M> {
     pub data: T,
-    pub meta: Option<ApiResponseMeta>,
+    pub meta: M,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -31,16 +31,16 @@ impl fmt::Display for ApiError {
 
 impl std::error::Error for ApiError {}
 
-pub type ApiResult<T> = Result<ApiResponse<T>>;
+pub type ApiResult<T, M> = Result<ApiResponse<T, M>>;
 
 #[async_trait]
 pub(crate) trait ApiResponseExt {
-    async fn api_json<T: DeserializeOwned>(self) -> ApiResult<T>;
+    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(self) -> ApiResult<T, M>;
 }
 
 #[async_trait]
 impl ApiResponseExt for Response {
-    async fn api_json<T: DeserializeOwned>(self) -> ApiResult<T> {
+    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(self) -> ApiResult<T, M> {
         let status = self.status();
         if status.is_success() {
             Ok(self.json().await?)

@@ -17,7 +17,7 @@ fn get_examples(path: impl AsRef<Path>) -> impl Iterator<Item = (PathBuf, File)>
 #[test]
 fn tweet_serde() {
     for (path, example) in get_examples("./fixtures/data/tweet") {
-        let _ = serde_json::from_reader::<_, ApiResponse<Vec<Tweet>>>(example)
+        let _ = serde_json::from_reader::<_, ApiResponse<Vec<Tweet>, Option<()>>>(example)
             .unwrap_or_else(|e| panic!("Could not read example '{}': {}", path.display(), e));
     }
 }

@@ -1,12 +1,5 @@
 use strum::Display;
 
-#[macro_export]
-macro_rules! fields {
-    ($($x:expr),*) => {
-        [$($x.into()),*]
-    };
-}
-
 #[derive(Copy, Clone, Debug, Display)]
 #[strum(serialize_all = "snake_case")]
 pub enum MediaField {
