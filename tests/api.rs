@@ -1,9 +1,14 @@
+use rand::distributions::{Alphanumeric, DistString};
 use twitter_v2::{BearerToken, DraftTweet, TwitterApi};
 
 fn get_api() -> TwitterApi<BearerToken> {
     TwitterApi::new(BearerToken::new(
         std::env::var("BEARER_TOKEN").expect("BEARER_TOKEN not found"),
     ))
+}
+
+fn rand_str(len: usize) -> String {
+    Alphanumeric.sample_string(&mut rand::thread_rng(), len)
 }
 
 #[tokio::test]
@@ -21,15 +26,23 @@ async fn get_tweet() {
     assert!(res.is_ok(), "{}", res.unwrap_err())
 }
 
-#[tokio::test]
-async fn post_tweet() {
-    let res = get_api()
-        .post_tweet(&DraftTweet {
-            text: Some("Hello, world!".to_string()),
-            ..Default::default()
-        })
-        .await;
+async fn post_and_delete_tweet(tweet: &DraftTweet) {
+    let api = get_api();
+    let res = api.post_tweet(tweet).await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
+    let id = res.unwrap().data.id;
+    let res = api.delete_tweet(id).await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+    assert!(res.unwrap().data.deleted)
+}
+
+#[tokio::test]
+async fn manage_tweet() {
+    post_and_delete_tweet(&DraftTweet {
+        text: Some(rand_str(20)),
+        ..Default::default()
+    })
+    .await;
 }
 
 #[tokio::test]

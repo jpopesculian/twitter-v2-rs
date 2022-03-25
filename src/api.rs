@@ -1,6 +1,6 @@
 use crate::api_result::{ApiResponseExt, ApiResult};
 use crate::authorization::Authorization;
-use crate::data::{Tweet, User};
+use crate::data::{Deleted, Tweet, User};
 use crate::error::Result;
 use crate::expansions::TweetExpansion;
 use crate::fields::Field;
@@ -78,6 +78,11 @@ where
 
     pub async fn post_tweet(&self, tweet: &DraftTweet) -> ApiResult<Tweet> {
         self.send(self.request(Method::POST, "tweets")?.json(tweet))
+            .await
+    }
+
+    pub async fn delete_tweet(&self, id: impl ToId) -> ApiResult<Deleted> {
+        self.send(self.request(Method::DELETE, &format!("tweets/{id}"))?)
             .await
     }
 

@@ -1,3 +1,4 @@
+mod deleted;
 mod entity;
 mod list;
 mod media;
@@ -7,6 +8,7 @@ mod tweet;
 mod user;
 mod withheld;
 
+pub use deleted::*;
 pub use entity::*;
 pub use list::*;
 pub use media::*;
