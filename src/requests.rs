@@ -9,6 +9,7 @@ pub struct DraftTweetGeo {
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct DraftTweetMedia {
     pub media_ids: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tagged_user_ids: Option<Vec<String>>,
 }
 
@@ -20,7 +21,9 @@ pub struct DraftTweetPoll {
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct DraftTweetReply {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub exclude_reply_user_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub in_reply_to_tweet_id: Option<String>,
 }
 
