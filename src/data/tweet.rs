@@ -1,6 +1,7 @@
 use super::entity::Entities;
 use super::metric::{NonPublicMetrics, OrganicOrPromotedMetrics, PublicMetrics};
 use super::withheld::Withheld;
+use crate::query::Id;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
@@ -9,12 +10,12 @@ pub struct Attachments {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub media_keys: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub poll_ids: Option<Vec<String>>,
+    pub poll_ids: Option<Vec<Id>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ContextAnnotationDescription {
-    pub id: String,
+    pub id: Id,
     pub name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -41,7 +42,7 @@ pub struct GeoCoordinates {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Geo {
-    pub place_id: String,
+    pub place_id: Id,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub coordinates: Option<GeoCoordinates>,
 }
@@ -64,7 +65,7 @@ pub enum ReferencedTweetKind {
 pub struct ReferencedTweet {
     #[serde(rename = "type")]
     pub kind: ReferencedTweetKind,
-    pub id: String,
+    pub id: Id,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -85,16 +86,16 @@ pub enum Source {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Tweet {
-    pub id: String,
+    pub id: Id,
     pub text: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attachments: Option<Attachments>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub author_id: Option<String>,
+    pub author_id: Option<Id>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context_annotations: Option<Vec<ContextAnnotation>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub conversation_id: Option<String>,
+    pub conversation_id: Option<Id>,
     #[serde(
         default,
         with = "time::serde::rfc3339::option",
@@ -106,7 +107,7 @@ pub struct Tweet {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub geo: Option<Geo>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub in_reply_to_user_id: Option<String>,
+    pub in_reply_to_user_id: Option<Id>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lang: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -5,8 +5,7 @@ use crate::api_result::{ApiResponseExt, ApiResult};
 use crate::authorization::Authorization;
 use crate::error::Result;
 use reqwest::header::AUTHORIZATION;
-use reqwest::Method;
-use reqwest::{Client, Url};
+use reqwest::{Client, IntoUrl, Method, Url};
 use serde::de::DeserializeOwned;
 use std::sync::Arc;
 
@@ -29,11 +28,15 @@ where
         }
     }
 
-    pub fn request(&self, method: Method, url: &str) -> Result<reqwest::RequestBuilder> {
-        Ok(self.client.request(method, self.base_url.join(url)?))
+    pub(crate) fn url(&self, url: impl AsRef<str>) -> Result<Url> {
+        Ok(self.base_url.join(url.as_ref())?)
     }
 
-    pub async fn send<T: DeserializeOwned, M: DeserializeOwned>(
+    pub(crate) fn request(&self, method: Method, url: impl IntoUrl) -> reqwest::RequestBuilder {
+        self.client.request(method, url)
+    }
+
+    pub(crate) async fn send<T: DeserializeOwned, M: DeserializeOwned>(
         &self,
         req: reqwest::RequestBuilder,
     ) -> ApiResult<T, M> {

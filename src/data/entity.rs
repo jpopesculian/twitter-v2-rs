@@ -1,3 +1,4 @@
+use crate::query::Id;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -57,7 +58,7 @@ pub struct MentionEntity {
     pub end: usize,
     pub username: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<String>,
+    pub id: Option<Id>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

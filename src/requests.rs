@@ -2,13 +2,15 @@ use crate::api::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{ReplySettings, Tweet};
-use crate::query::ToId;
+use crate::query::{Id, IntoId};
+use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
+use url::Url;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct DraftTweetGeo {
-    pub place_id: String,
+    pub place_id: Id,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -53,9 +55,10 @@ struct DraftTweet {
     pub text: Option<String>,
 }
 
+#[derive(Debug)]
 pub struct TweetBuilder<A> {
     client: TwitterApi<A>,
-    req: reqwest::RequestBuilder,
+    url: Url,
     tweet: DraftTweet,
 }
 
@@ -63,40 +66,40 @@ impl<A> TweetBuilder<A>
 where
     A: Authorization,
 {
-    pub fn new(client: &TwitterApi<A>, req: reqwest::RequestBuilder) -> Self {
+    pub fn new(client: &TwitterApi<A>, url: Url) -> Self {
         Self {
             client: client.clone(),
-            req,
+            url,
             tweet: Default::default(),
         }
     }
-    pub fn text(mut self, text: String) -> Self {
+    pub fn text(&mut self, text: String) -> &mut Self {
         self.tweet.text = Some(text);
         self
     }
-    pub fn direct_message_deep_link(mut self, direct_message_deep_link: String) -> Self {
+    pub fn direct_message_deep_link(&mut self, direct_message_deep_link: String) -> &mut Self {
         self.tweet.direct_message_deep_link = Some(direct_message_deep_link);
         self
     }
-    pub fn for_super_followers_only(mut self, for_super_followers_only: bool) -> Self {
+    pub fn for_super_followers_only(&mut self, for_super_followers_only: bool) -> &mut Self {
         self.tweet.for_super_followers_only = Some(for_super_followers_only);
         self
     }
-    pub fn place_id(mut self, place_id: impl ToId) -> Self {
+    pub fn place_id(&mut self, place_id: impl IntoId) -> &mut Self {
         if let Some(geo) = self.tweet.geo.as_mut() {
-            geo.place_id = place_id.to_string();
+            geo.place_id = place_id.into_id();
         } else {
             self.tweet.geo = Some(DraftTweetGeo {
-                place_id: place_id.to_string(),
+                place_id: place_id.into_id(),
             });
         }
         self
     }
     pub fn add_media(
-        mut self,
-        media_ids: impl IntoIterator<Item = impl ToId>,
-        tagged_user_ids: impl IntoIterator<Item = impl ToId>,
-    ) -> Self {
+        &mut self,
+        media_ids: impl IntoIterator<Item = impl IntoId>,
+        tagged_user_ids: impl IntoIterator<Item = impl IntoId>,
+    ) -> &mut Self {
         if let Some(media) = self.tweet.media.as_mut() {
             media
                 .media_ids
@@ -116,10 +119,10 @@ where
         self
     }
     pub fn poll(
-        mut self,
+        &mut self,
         options: impl IntoIterator<Item = impl ToString>,
         duration: Duration,
-    ) -> Self {
+    ) -> &mut Self {
         self.tweet.poll = Some(DraftTweetPoll {
             options: options
                 .into_iter()
@@ -129,17 +132,17 @@ where
         });
         self
     }
-    pub fn quote_tweet_id(mut self, id: impl ToId) -> Self {
+    pub fn quote_tweet_id(&mut self, id: impl IntoId) -> &mut Self {
         self.tweet.quote_tweet_id = Some(id.to_string());
         self
     }
-    pub fn add_exclude_reply_user_id(self, user_id: impl ToId) -> Self {
+    pub fn add_exclude_reply_user_id(&mut self, user_id: impl IntoId) -> &mut Self {
         self.add_exclude_reply_user_ids([user_id])
     }
     pub fn add_exclude_reply_user_ids(
-        mut self,
-        user_ids: impl IntoIterator<Item = impl ToId>,
-    ) -> Self {
+        &mut self,
+        user_ids: impl IntoIterator<Item = impl IntoId>,
+    ) -> &mut Self {
         let mut user_ids = user_ids
             .into_iter()
             .map(|id| id.to_string())
@@ -158,7 +161,7 @@ where
         }
         self
     }
-    pub fn in_reply_to_tweet_id(mut self, user_id: impl ToId) -> Self {
+    pub fn in_reply_to_tweet_id(&mut self, user_id: impl IntoId) -> &mut Self {
         if let Some(reply) = self.tweet.reply.as_mut() {
             reply.in_reply_to_tweet_id = Some(user_id.to_string());
         } else {
@@ -169,12 +172,18 @@ where
         }
         self
     }
-    pub fn reply_settings(mut self, reply_settings: ReplySettings) -> Self {
+    pub fn reply_settings(&mut self, reply_settings: ReplySettings) -> &mut Self {
         self.tweet.reply_settings = Some(reply_settings);
         self
     }
-    pub async fn send(self) -> ApiResult<Tweet, Option<()>> {
-        self.client.send(self.req.json(&self.tweet)).await
+    pub async fn send(&self) -> ApiResult<Tweet, Option<()>> {
+        self.client
+            .send(
+                self.client
+                    .request(Method::POST, self.url.clone())
+                    .json(&self.tweet),
+            )
+            .await
     }
 }
 
@@ -182,7 +191,7 @@ impl<A> Clone for TweetBuilder<A> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
-            req: self.req.try_clone().unwrap(),
+            url: self.url.clone(),
             tweet: self.tweet.clone(),
         }
     }

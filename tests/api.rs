@@ -43,7 +43,7 @@ async fn send_and_delete_tweet(tweet: TweetBuilder<impl Authorization>) {
 
 #[tokio::test]
 async fn manage_tweet() {
-    send_and_delete_tweet(get_api().post_tweet().text(rand_str(20))).await
+    send_and_delete_tweet(get_api().post_tweet().text(rand_str(20)).clone()).await
 }
 
 #[tokio::test]

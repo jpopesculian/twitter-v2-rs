@@ -2,7 +2,7 @@ use super::TwitterApi;
 use crate::authorization::Authorization;
 use crate::data::User;
 use crate::error::Result;
-use crate::query::{get_req_builder, ToId, ToQuery};
+use crate::query::{get_req_builder, IntoId, ToQuery};
 use reqwest::Method;
 
 get_req_builder! {
@@ -19,18 +19,18 @@ where
 {
     pub fn get_users(
         &self,
-        ids: impl IntoIterator<Item = impl ToId>,
+        ids: impl IntoIterator<Item = impl IntoId>,
     ) -> Result<GetUsersRequestBuilder<A, Vec<User>, Option<()>>> {
         Ok(GetUsersRequestBuilder::new(
             self,
-            self.request(Method::GET, "users")?
+            self.request(Method::GET, self.url("users")?)
                 .query(&ids.to_query("ids")),
         ))
     }
-    pub fn get_user(&self, id: impl ToId) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {
+    pub fn get_user(&self, id: impl IntoId) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {
         Ok(GetUsersRequestBuilder::new(
             self,
-            self.request(Method::GET, &format!("users/{id}"))?,
+            self.request(Method::GET, self.url(format!("users/{id}"))?),
         ))
     }
     pub fn get_users_by_usernames(
@@ -39,7 +39,7 @@ where
     ) -> Result<GetUsersRequestBuilder<A, Vec<User>, Option<()>>> {
         Ok(GetUsersRequestBuilder::new(
             self,
-            self.request(Method::GET, "users/by")?
+            self.request(Method::GET, self.url("users/by")?)
                 .query(&usernames.to_query("usernames")),
         ))
     }
@@ -51,14 +51,14 @@ where
             self,
             self.request(
                 Method::GET,
-                &format!("users/by/username/{}", username.to_string()),
-            )?,
+                self.url(format!("users/by/username/{}", username.to_string()))?,
+            ),
         ))
     }
     pub fn get_users_me(&self) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {
         Ok(GetUsersRequestBuilder::new(
             self,
-            self.request(Method::GET, "users/me")?,
+            self.request(Method::GET, self.url("users/me")?),
         ))
     }
 }

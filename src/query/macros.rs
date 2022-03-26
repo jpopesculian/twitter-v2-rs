@@ -75,13 +75,13 @@ macro_rules! get_req_builder_arg {
         }
     };
     (since_id) => {
-        pub fn since_id(mut self, since_id: impl $crate::ToId) -> Self {
+        pub fn since_id(mut self, since_id: impl $crate::IntoId) -> Self {
             self.req = self.req.query(&(("since_id", since_id.to_string())));
             self
         }
     };
     (until_id) => {
-        pub fn until_id(mut self, until_id: impl $crate::ToId) -> Self {
+        pub fn until_id(mut self, until_id: impl $crate::IntoId) -> Self {
             self.req = self.req.query(&(("until_id", until_id.to_string())));
             self
         }

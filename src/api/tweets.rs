@@ -4,7 +4,7 @@ use crate::authorization::Authorization;
 use crate::data::{Deleted, Tweet};
 use crate::error::Result;
 use crate::meta::TimelineMeta;
-use crate::query::{get_req_builder, ToId, ToQuery};
+use crate::query::{get_req_builder, IntoId, ToQuery};
 use crate::TweetBuilder;
 use reqwest::Method;
 
@@ -43,47 +43,47 @@ where
 {
     pub fn get_tweets(
         &self,
-        ids: impl IntoIterator<Item = impl ToId>,
+        ids: impl IntoIterator<Item = impl IntoId>,
     ) -> Result<GetTweetsRequestBuilder<A, Vec<Tweet>, Option<()>>> {
         Ok(GetTweetsRequestBuilder::new(
             self,
-            self.request(Method::GET, "tweets")?
+            self.request(Method::GET, self.url("tweets")?)
                 .query(&ids.to_query("ids")),
         ))
     }
     pub fn get_tweet(
         &self,
-        id: impl ToId,
+        id: impl IntoId,
     ) -> Result<GetTweetsRequestBuilder<A, Tweet, Option<()>>> {
         Ok(GetTweetsRequestBuilder::new(
             self,
-            self.request(Method::GET, &format!("tweets/{id}"))?,
+            self.request(Method::GET, self.url(format!("tweets/{id}"))?),
         ))
     }
     pub fn get_user_tweets(
         &self,
-        user_id: impl ToId,
+        user_id: impl IntoId,
     ) -> Result<GetTimelineRequestBuilder<A, Vec<Tweet>, TimelineMeta>> {
         Ok(GetTimelineRequestBuilder::new(
             self,
-            self.request(Method::GET, &format!("users/{user_id}/tweets"))?,
+            self.request(Method::GET, self.url(format!("users/{user_id}/tweets"))?),
         ))
     }
     pub fn get_user_mentions(
         &self,
-        user_id: impl ToId,
+        user_id: impl IntoId,
     ) -> Result<GetTimelineRequestBuilder<A, Vec<Tweet>, TimelineMeta>> {
         Ok(GetTimelineRequestBuilder::new(
             self,
-            self.request(Method::GET, &format!("users/{user_id}/mentions"))?,
+            self.request(Method::GET, self.url(format!("users/{user_id}/mentions"))?),
         ))
     }
     pub fn post_tweet(&self) -> TweetBuilder<A> {
-        TweetBuilder::new(self, self.request(Method::POST, "tweets").unwrap())
+        TweetBuilder::new(self, self.url("tweets").unwrap())
     }
 
-    pub async fn delete_tweet(&self, id: impl ToId) -> ApiResult<Deleted, Option<()>> {
-        self.send(self.request(Method::DELETE, &format!("tweets/{id}"))?)
+    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<Deleted, Option<()>> {
+        self.send(self.request(Method::DELETE, self.url(format!("tweets/{id}"))?))
             .await
     }
 }

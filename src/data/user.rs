@@ -1,13 +1,14 @@
 use super::entity::Entities;
 use super::metric::PublicMetrics;
 use super::withheld::Withheld;
+use crate::query::Id;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use url::Url;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct User {
-    pub id: String,
+    pub id: Id,
     pub name: String,
     pub username: String,
     #[serde(
@@ -23,7 +24,7 @@ pub struct User {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub pinned_tweet_id: Option<String>,
+    pub pinned_tweet_id: Option<Id>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image_url: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
