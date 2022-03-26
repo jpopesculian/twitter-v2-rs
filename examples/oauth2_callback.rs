@@ -106,7 +106,6 @@ async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
     // get tweet by id
     let tweet = api
         .get_tweet(20)
-        .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?
         .send()
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;

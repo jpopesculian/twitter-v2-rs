@@ -2,9 +2,8 @@ use super::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{Deleted, Tweet};
-use crate::error::Result;
 use crate::meta::TimelineMeta;
-use crate::query::{get_req_builder, IntoId, ToQuery};
+use crate::query::{get_req_builder, IntoId, UrlQueryExt};
 use crate::TweetBuilder;
 use reqwest::Method;
 
@@ -44,39 +43,25 @@ where
     pub fn get_tweets(
         &self,
         ids: impl IntoIterator<Item = impl IntoId>,
-    ) -> Result<GetTweetsRequestBuilder<A, Vec<Tweet>, Option<()>>> {
-        Ok(GetTweetsRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url("tweets")?)
-                .query(&ids.to_query("ids")),
-        ))
+    ) -> GetTweetsRequestBuilder<A, Vec<Tweet>, Option<()>> {
+        let mut url = self.url("tweets").unwrap();
+        url.append_query_seq("ids", ids);
+        GetTweetsRequestBuilder::new(self, url)
     }
-    pub fn get_tweet(
-        &self,
-        id: impl IntoId,
-    ) -> Result<GetTweetsRequestBuilder<A, Tweet, Option<()>>> {
-        Ok(GetTweetsRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url(format!("tweets/{id}"))?),
-        ))
+    pub fn get_tweet(&self, id: impl IntoId) -> GetTweetsRequestBuilder<A, Tweet, Option<()>> {
+        GetTweetsRequestBuilder::new(self, self.url(format!("tweets/{id}")).unwrap())
     }
     pub fn get_user_tweets(
         &self,
         user_id: impl IntoId,
-    ) -> Result<GetTimelineRequestBuilder<A, Vec<Tweet>, TimelineMeta>> {
-        Ok(GetTimelineRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url(format!("users/{user_id}/tweets"))?),
-        ))
+    ) -> GetTimelineRequestBuilder<A, Vec<Tweet>, TimelineMeta> {
+        GetTimelineRequestBuilder::new(self, self.url(format!("users/{user_id}/tweets")).unwrap())
     }
     pub fn get_user_mentions(
         &self,
         user_id: impl IntoId,
-    ) -> Result<GetTimelineRequestBuilder<A, Vec<Tweet>, TimelineMeta>> {
-        Ok(GetTimelineRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url(format!("users/{user_id}/mentions"))?),
-        ))
+    ) -> GetTimelineRequestBuilder<A, Vec<Tweet>, TimelineMeta> {
+        GetTimelineRequestBuilder::new(self, self.url(format!("users/{user_id}/mentions")).unwrap())
     }
     pub fn post_tweet(&self) -> TweetBuilder<A> {
         TweetBuilder::new(self, self.url("tweets").unwrap())

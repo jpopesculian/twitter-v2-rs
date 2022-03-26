@@ -1,114 +1,121 @@
 macro_rules! get_req_builder_arg {
     (media_fields) => {
         pub fn media_fields(
-            mut self,
+            &mut self,
             fields: impl IntoIterator<Item = $crate::MediaField>,
-        ) -> Self {
-            self.req = self.req.query(&fields.to_query("media.fields"));
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("media.fields", fields);
             self
         }
     };
     (place_fields) => {
         pub fn place_fields(
-            mut self,
+            &mut self,
             fields: impl IntoIterator<Item = $crate::PlaceField>,
-        ) -> Self {
-            self.req = self.req.query(&fields.to_query("place.fields"));
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("place.fields", fields);
             self
         }
     };
     (poll_fields) => {
-        pub fn poll_fields(mut self, fields: impl IntoIterator<Item = $crate::PollField>) -> Self {
-            self.req = self.req.query(&fields.to_query("poll.fields"));
+        pub fn poll_fields(
+            &mut self,
+            fields: impl IntoIterator<Item = $crate::PollField>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("poll.fields", fields);
             self
         }
     };
     (user_fields) => {
-        pub fn user_fields(mut self, fields: impl IntoIterator<Item = $crate::UserField>) -> Self {
-            self.req = self.req.query(&fields.to_query("user.fields"));
+        pub fn user_fields(
+            &mut self,
+            fields: impl IntoIterator<Item = $crate::UserField>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("user.fields", fields);
             self
         }
     };
     (tweet_fields) => {
         pub fn tweet_fields(
-            mut self,
+            &mut self,
             fields: impl IntoIterator<Item = $crate::TweetField>,
-        ) -> Self {
-            self.req = self.req.query(&fields.to_query("tweet.fields"));
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("tweet.fields", fields);
             self
         }
     };
     (tweet_expansions) => {
         pub fn expansions(
-            mut self,
+            &mut self,
             expansions: impl IntoIterator<Item = $crate::TweetExpansion>,
-        ) -> Self {
-            self.req = self.req.query(&expansions.to_query("expansions"));
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("expansions", expansions);
             self
         }
     };
     (user_expansions) => {
         pub fn expansions(
-            mut self,
+            &mut self,
             expansions: impl IntoIterator<Item = $crate::UserExpansion>,
-        ) -> Self {
-            self.req = self.req.query(&expansions.to_query("expansions"));
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("expansions", expansions);
             self
         }
     };
     (exclude) => {
-        pub fn exclude(mut self, exclude: impl IntoIterator<Item = $crate::Exclude>) -> Self {
-            self.req = self.req.query(&exclude.to_query("exclude"));
+        pub fn exclude(&mut self, exclude: impl IntoIterator<Item = $crate::Exclude>) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("exclude", exclude);
             self
         }
     };
     (max_results) => {
-        pub fn max_results(mut self, max_results: usize) -> Self {
-            self.req = self.req.query(&(("max_results", max_results)));
+        pub fn max_results(&mut self, max_results: usize) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_val("max_results", max_results);
             self
         }
     };
     (pagination_token) => {
-        pub fn pagination_token(mut self, pagination_token: &str) -> Self {
-            self.req = self.req.query(&(("pagination_token", pagination_token)));
+        pub fn pagination_token(&mut self, pagination_token: &str) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url
+                .append_query_val("pagination_token", pagination_token);
             self
         }
     };
     (since_id) => {
-        pub fn since_id(mut self, since_id: impl $crate::IntoId) -> Self {
-            self.req = self.req.query(&(("since_id", since_id.to_string())));
+        pub fn since_id(&mut self, since_id: impl $crate::IntoId) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_val("since_id", since_id);
             self
         }
     };
     (until_id) => {
-        pub fn until_id(mut self, until_id: impl $crate::IntoId) -> Self {
-            self.req = self.req.query(&(("until_id", until_id.to_string())));
+        pub fn until_id(&mut self, until_id: impl $crate::IntoId) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_val("until_id", until_id);
             self
         }
     };
     (start_time) => {
-        pub fn start_time(mut self, start_time: time::OffsetDateTime) -> Self {
-            self.req = self.req.query(
-                &((
-                    "start_time",
-                    start_time
-                        .format(&time::format_description::well_known::Rfc3339)
-                        .unwrap(),
-                )),
-            );
+        pub fn start_time(&mut self, start_time: time::OffsetDateTime) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_time("start_time", start_time);
             self
         }
     };
     (end_time) => {
-        pub fn end_time(mut self, end_time: time::OffsetDateTime) -> Self {
-            self.req = self.req.query(
-                &((
-                    "end_time",
-                    end_time
-                        .format(&time::format_description::well_known::Rfc3339)
-                        .unwrap(),
-                )),
-            );
+        pub fn end_time(&mut self, end_time: time::OffsetDateTime) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_time("end_time", end_time);
             self
         }
     };
@@ -118,7 +125,7 @@ macro_rules! get_req_builder {
     ($vis:vis struct $class:ident { $($optional_arg:tt),* }) => {
         $vis struct $class<A, T, M> {
             client: $crate::TwitterApi<A>,
-            req: reqwest::RequestBuilder,
+            url: url::Url,
             return_ty: std::marker::PhantomData<(T, M)>
         }
 
@@ -128,12 +135,13 @@ macro_rules! get_req_builder {
             T: serde::de::DeserializeOwned,
             M: serde::de::DeserializeOwned
         {
-            fn new(client: &$crate::TwitterApi<A>, req: reqwest::RequestBuilder) -> Self {
-                Self { client: client.clone(), req, return_ty: Default::default() }
+            fn new(client: &$crate::TwitterApi<A>, url: url::Url) -> Self {
+                Self { client: client.clone(), url, return_ty: Default::default() }
             }
             $($crate::query::get_req_builder_arg! { $optional_arg })*
             pub async fn send(self) -> $crate::ApiResult<T, M> {
-                self.client.send(self.req).await
+                self.client
+                    .send(self.client.request(Method::GET, self.url.clone())).await
             }
         }
 
@@ -141,7 +149,7 @@ macro_rules! get_req_builder {
             fn clone(&self) -> Self {
                 Self {
                     client: self.client.clone(),
-                    req: self.req.try_clone().unwrap(),
+                    url: self.url.clone(),
                     return_ty: Default::default()
                 }
             }

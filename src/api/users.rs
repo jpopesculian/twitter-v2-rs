@@ -1,8 +1,9 @@
 use super::TwitterApi;
 use crate::authorization::Authorization;
 use crate::data::User;
-use crate::error::Result;
-use crate::query::{get_req_builder, IntoId, ToQuery};
+use crate::query::{get_req_builder, IntoId};
+use crate::utils::percent_encode;
+use crate::UrlQueryExt;
 use reqwest::Method;
 
 get_req_builder! {
@@ -20,45 +21,36 @@ where
     pub fn get_users(
         &self,
         ids: impl IntoIterator<Item = impl IntoId>,
-    ) -> Result<GetUsersRequestBuilder<A, Vec<User>, Option<()>>> {
-        Ok(GetUsersRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url("users")?)
-                .query(&ids.to_query("ids")),
-        ))
+    ) -> GetUsersRequestBuilder<A, Vec<User>, Option<()>> {
+        let mut url = self.url("users").unwrap();
+        url.append_query_seq("ids", ids);
+        GetUsersRequestBuilder::new(self, url)
     }
-    pub fn get_user(&self, id: impl IntoId) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {
-        Ok(GetUsersRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url(format!("users/{id}"))?),
-        ))
+    pub fn get_user(&self, id: impl IntoId) -> GetUsersRequestBuilder<A, User, Option<()>> {
+        GetUsersRequestBuilder::new(self, self.url(format!("users/{id}")).unwrap())
     }
     pub fn get_users_by_usernames(
         &self,
         usernames: impl IntoIterator<Item = impl ToString>,
-    ) -> Result<GetUsersRequestBuilder<A, Vec<User>, Option<()>>> {
-        Ok(GetUsersRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url("users/by")?)
-                .query(&usernames.to_query("usernames")),
-        ))
+    ) -> GetUsersRequestBuilder<A, Vec<User>, Option<()>> {
+        let mut url = self.url("users/by").unwrap();
+        url.append_query_seq("usernames", usernames);
+        GetUsersRequestBuilder::new(self, url)
     }
     pub fn get_user_by_username(
         &self,
         username: impl ToString,
-    ) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {
-        Ok(GetUsersRequestBuilder::new(
+    ) -> GetUsersRequestBuilder<A, User, Option<()>> {
+        GetUsersRequestBuilder::new(
             self,
-            self.request(
-                Method::GET,
-                self.url(format!("users/by/username/{}", username.to_string()))?,
-            ),
-        ))
+            self.url(format!(
+                "users/by/username/{}",
+                percent_encode(&username.to_string())
+            ))
+            .unwrap(),
+        )
     }
-    pub fn get_users_me(&self) -> Result<GetUsersRequestBuilder<A, User, Option<()>>> {
-        Ok(GetUsersRequestBuilder::new(
-            self,
-            self.request(Method::GET, self.url("users/me")?),
-        ))
+    pub fn get_users_me(&self) -> GetUsersRequestBuilder<A, User, Option<()>> {
+        GetUsersRequestBuilder::new(self, self.url("users/me").unwrap())
     }
 }
