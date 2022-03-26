@@ -67,7 +67,7 @@ where
         TweetBuilder::new(self, self.url("tweets").unwrap())
     }
 
-    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<Deleted, Option<()>> {
+    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, Option<()>> {
         self.send(self.request(Method::DELETE, self.url(format!("tweets/{id}"))?))
             .await
     }

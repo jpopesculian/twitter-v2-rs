@@ -1,7 +1,7 @@
 mod tweets;
 mod users;
 
-use crate::api_result::{ApiResponseExt, ApiResult};
+use crate::api_result::{ApiResponse, ApiResponseExt, ApiResult};
 use crate::authorization::Authorization;
 use crate::error::Result;
 use reqwest::header::AUTHORIZATION;
@@ -39,11 +39,13 @@ where
     pub(crate) async fn send<T: DeserializeOwned, M: DeserializeOwned>(
         &self,
         req: reqwest::RequestBuilder,
-    ) -> ApiResult<T, M> {
+    ) -> ApiResult<A, T, M> {
         let mut req = req.build()?;
         let authorization = self.auth.header(&req).await?;
         let _ = req.headers_mut().insert(AUTHORIZATION, authorization);
-        self.client.execute(req).await?.api_json().await
+        let url = req.url().clone();
+        let response = self.client.execute(req).await?.api_json().await?;
+        Ok(ApiResponse::new(self, url, response))
     }
 }
 

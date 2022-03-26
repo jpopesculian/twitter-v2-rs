@@ -1,14 +1,16 @@
+use crate::api::TwitterApi;
 use crate::{Error, Result};
 use async_trait::async_trait;
 use reqwest::{Response, StatusCode};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
+use url::Url;
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct ApiResponse<T, M> {
-    pub data: T,
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub(crate) struct InnerApiResponse<T, M> {
+    data: T,
     #[serde(skip_serializing_if = "crate::utils::serde::is_null")]
-    pub meta: M,
+    meta: M,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -29,16 +31,61 @@ impl fmt::Display for ApiError {
 
 impl std::error::Error for ApiError {}
 
-pub type ApiResult<T, M> = Result<ApiResponse<T, M>>;
+pub struct ApiResponse<A, T, M> {
+    client: TwitterApi<A>,
+    url: Url,
+    response: InnerApiResponse<T, M>,
+}
+
+impl<A, T, M> ApiResponse<A, T, M> {
+    pub(crate) fn new(client: &TwitterApi<A>, url: Url, response: InnerApiResponse<T, M>) -> Self {
+        Self {
+            client: client.clone(),
+            url,
+            response,
+        }
+    }
+    pub fn data(&self) -> &T {
+        &self.response.data
+    }
+    pub fn meta(&self) -> &M {
+        &self.response.meta
+    }
+    pub fn into_data(self) -> T {
+        self.response.data
+    }
+    pub fn into_meta(self) -> M {
+        self.response.meta
+    }
+}
+
+impl<A, T, M> Serialize for ApiResponse<A, T, M>
+where
+    T: Serialize,
+    M: Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.response.serialize(serializer)
+    }
+}
+
+pub type ApiResult<A, T, M> = Result<ApiResponse<A, T, M>>;
 
 #[async_trait]
 pub(crate) trait ApiResponseExt {
-    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(self) -> ApiResult<T, M>;
+    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(
+        self,
+    ) -> Result<InnerApiResponse<T, M>>;
 }
 
 #[async_trait]
 impl ApiResponseExt for Response {
-    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(self) -> ApiResult<T, M> {
+    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(
+        self,
+    ) -> Result<InnerApiResponse<T, M>> {
         let status = self.status();
         if status.is_success() {
             Ok(self.json().await?)

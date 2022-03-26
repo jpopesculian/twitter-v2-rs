@@ -176,7 +176,7 @@ where
         self.tweet.reply_settings = Some(reply_settings);
         self
     }
-    pub async fn send(&self) -> ApiResult<Tweet, Option<()>> {
+    pub async fn send(&self) -> ApiResult<A, Tweet, Option<()>> {
         self.client
             .send(
                 self.client

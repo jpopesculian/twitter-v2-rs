@@ -109,7 +109,7 @@ async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
         .send()
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
-    Ok::<_, (StatusCode, String)>(Json(tweet.data))
+    Ok::<_, (StatusCode, String)>(Json(tweet.data().clone()))
 }
 
 async fn revoke(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {

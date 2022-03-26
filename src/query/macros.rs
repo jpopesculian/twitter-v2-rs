@@ -139,7 +139,7 @@ macro_rules! get_req_builder {
                 Self { client: client.clone(), url, return_ty: Default::default() }
             }
             $($crate::query::get_req_builder_arg! { $optional_arg })*
-            pub async fn send(self) -> $crate::ApiResult<T, M> {
+            pub async fn send(self) -> $crate::ApiResult<A, T, M> {
                 self.client
                     .send(self.client.request(Method::GET, self.url.clone())).await
             }
