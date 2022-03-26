@@ -1,7 +1,7 @@
 use super::entity::Entities;
 use super::metric::{NonPublicMetrics, OrganicOrPromotedMetrics, PublicMetrics};
 use super::withheld::Withheld;
-use crate::query::Id;
+use crate::id::Id;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 

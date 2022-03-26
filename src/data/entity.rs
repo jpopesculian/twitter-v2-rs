@@ -1,4 +1,4 @@
-use crate::query::Id;
+use crate::id::Id;
 use serde::{Deserialize, Serialize};
 use url::Url;
 

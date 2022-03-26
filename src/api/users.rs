@@ -1,7 +1,8 @@
 use super::TwitterApi;
 use crate::authorization::Authorization;
 use crate::data::User;
-use crate::query::{get_req_builder, IntoId};
+use crate::id::IntoId;
+use crate::query::get_req_builder;
 use crate::utils::percent_encode;
 use crate::UrlQueryExt;
 use reqwest::Method;

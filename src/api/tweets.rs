@@ -2,8 +2,9 @@ use super::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{Deleted, Tweet};
+use crate::id::IntoId;
 use crate::meta::TimelineMeta;
-use crate::query::{get_req_builder, IntoId, UrlQueryExt};
+use crate::query::{get_req_builder, UrlQueryExt};
 use crate::TweetBuilder;
 use reqwest::Method;
 

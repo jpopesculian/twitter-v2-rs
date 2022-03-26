@@ -1,7 +1,7 @@
 use rand::distributions::{Alphanumeric, DistString};
-use twitter_v2::{Authorization, BearerToken, TweetBuilder, TwitterApi};
+use twitter_v2::{BearerToken, PaginableApiResponse, TweetBuilder, TwitterApi};
 
-fn get_api() -> TwitterApi<impl Authorization> {
+fn get_api() -> TwitterApi<BearerToken> {
     TwitterApi::new(BearerToken::new(
         std::env::var("BEARER_TOKEN").expect("BEARER_TOKEN not found"),
     ))
@@ -18,7 +18,7 @@ async fn get_tweets() {
         .send()
         .await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
-    assert_eq!(res.unwrap().data.len(), 2);
+    assert_eq!(res.unwrap().data().len(), 2);
 }
 
 #[tokio::test]
@@ -27,13 +27,13 @@ async fn get_tweet() {
     assert!(res.is_ok(), "{}", res.unwrap_err())
 }
 
-async fn send_and_delete_tweet(tweet: TweetBuilder<impl Authorization>) {
+async fn send_and_delete_tweet(tweet: TweetBuilder<BearerToken>) {
     let res = tweet.send().await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
-    let id = res.unwrap().data.id;
+    let id = res.unwrap().data().id;
     let res = get_api().delete_tweet(id).await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
-    assert!(res.unwrap().data.deleted)
+    assert!(res.unwrap().data().deleted)
 }
 
 #[tokio::test]
@@ -45,7 +45,7 @@ async fn manage_tweet() {
 async fn get_users() {
     let res = get_api().get_users(&[2244994945, 6253282]).send().await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
-    assert_eq!(res.unwrap().data.len(), 2);
+    assert_eq!(res.unwrap().data().len(), 2);
 }
 
 #[tokio::test]
@@ -56,8 +56,11 @@ async fn get_user() {
 
 #[tokio::test]
 async fn get_user_tweets() {
-    let res = get_api().get_user_tweets(2244994945).send().await;
+    let api = get_api();
+    let res = api.get_user_tweets(2244994945).send().await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
+    let next_page_res = res.unwrap().next_page().await;
+    assert!(next_page_res.is_ok(), "{}", next_page_res.unwrap_err());
 }
 
 #[tokio::test]
@@ -67,7 +70,7 @@ async fn get_users_by() {
         .send()
         .await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
-    assert_eq!(res.unwrap().data.len(), 2);
+    assert_eq!(res.unwrap().data().len(), 2);
 }
 
 #[tokio::test]

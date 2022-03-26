@@ -2,7 +2,7 @@ use crate::api::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{ReplySettings, Tweet};
-use crate::query::{Id, IntoId};
+use crate::id::{Id, IntoId};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;

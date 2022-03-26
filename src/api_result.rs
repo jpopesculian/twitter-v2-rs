@@ -1,7 +1,10 @@
 use crate::api::TwitterApi;
-use crate::{Error, Result};
+use crate::authorization::Authorization;
+use crate::error::{Error, Result};
+use crate::meta::PaginationMeta;
+use crate::query::UrlQueryExt;
 use async_trait::async_trait;
-use reqwest::{Response, StatusCode};
+use reqwest::{Method, Response, StatusCode};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 use url::Url;
@@ -31,6 +34,7 @@ impl fmt::Display for ApiError {
 
 impl std::error::Error for ApiError {}
 
+#[derive(Debug)]
 pub struct ApiResponse<A, T, M> {
     client: TwitterApi<A>,
     url: Url,
@@ -44,6 +48,9 @@ impl<A, T, M> ApiResponse<A, T, M> {
             url,
             response,
         }
+    }
+    pub fn url(&self) -> &Url {
+        &self.url
     }
     pub fn data(&self) -> &T {
         &self.response.data
@@ -69,6 +76,61 @@ where
         S: serde::Serializer,
     {
         self.response.serialize(serializer)
+    }
+}
+
+impl<A, T, M> Clone for ApiResponse<A, T, M>
+where
+    T: Clone,
+    M: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            client: self.client.clone(),
+            url: self.url.clone(),
+            response: self.response.clone(),
+        }
+    }
+}
+
+#[async_trait]
+pub trait PaginableApiResponse: Sized {
+    async fn next_page(&self) -> Result<Option<Self>>;
+    async fn previous_page(&self) -> Result<Option<Self>>;
+}
+
+#[async_trait]
+impl<A, T, M> PaginableApiResponse for ApiResponse<A, T, M>
+where
+    A: Authorization + Send + Sync,
+    T: DeserializeOwned + Send + Sync,
+    M: PaginationMeta + DeserializeOwned + Send + Sync,
+{
+    async fn next_page(&self) -> Result<Option<Self>> {
+        if let Some(token) = self.meta().next_token() {
+            let mut url = self.url.clone();
+            url.replace_query_val("pagination_token", token);
+            Ok(Some(
+                self.client
+                    .send(self.client.request(Method::GET, url))
+                    .await?,
+            ))
+        } else {
+            Ok(None)
+        }
+    }
+    async fn previous_page(&self) -> Result<Option<Self>> {
+        if let Some(token) = self.meta().previous_token() {
+            let mut url = self.url.clone();
+            url.replace_query_val("pagination_token", token);
+            Ok(Some(
+                self.client
+                    .send(self.client.request(Method::GET, url))
+                    .await?,
+            ))
+        } else {
+            Ok(None)
+        }
     }
 }
 
