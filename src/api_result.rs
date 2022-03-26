@@ -12,6 +12,7 @@ use url::Url;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub(crate) struct InnerApiResponse<T, M> {
+    #[serde(skip_serializing_if = "crate::utils::serde::is_null")]
     data: T,
     #[serde(skip_serializing_if = "crate::utils::serde::is_null")]
     meta: M,

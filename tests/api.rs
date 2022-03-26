@@ -106,6 +106,15 @@ async fn get_tweets_counts_recent() -> Result<()> {
 }
 
 #[tokio::test]
+async fn get_tweets_search_stream_rule() -> Result<()> {
+    let _ = get_api_app_ctx()
+        .get_tweets_search_stream_rules()
+        .send()
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
 async fn post_tweets_search_stream_rule() -> Result<()> {
     let res = get_api_app_ctx()
         .post_tweets_search_stream_rule()

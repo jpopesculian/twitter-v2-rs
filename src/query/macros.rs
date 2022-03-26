@@ -1,4 +1,11 @@
 macro_rules! get_req_builder_arg {
+    (ids) => {
+        pub fn ids(&mut self, ids: impl IntoIterator<Item = impl $crate::IntoId>) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("ids", ids);
+            self
+        }
+    };
     (media_fields) => {
         pub fn media_fields(
             &mut self,
