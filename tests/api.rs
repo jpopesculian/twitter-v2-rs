@@ -55,12 +55,44 @@ async fn get_user() {
 }
 
 #[tokio::test]
-async fn get_user_tweets() {
+async fn get_user_tweets_paginated() {
     let api = get_api();
-    let res = api.get_user_tweets(2244994945).send().await;
+    let res = api.get_user_tweets(2244994945).max_results(10).send().await;
     assert!(res.is_ok(), "{}", res.unwrap_err());
-    let next_page_res = res.unwrap().next_page().await;
-    assert!(next_page_res.is_ok(), "{}", next_page_res.unwrap_err());
+    let page1 = res.unwrap();
+
+    let res = page1.next_page().await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+    let res = res.unwrap();
+    assert!(res.is_some());
+    let page2 = res.unwrap();
+    assert_ne!(page2.meta().oldest_id, page1.meta().oldest_id);
+
+    let res = page2.next_page().await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+    let res = res.unwrap();
+    assert!(res.is_some());
+    let page3 = res.unwrap();
+    assert_ne!(page3.meta().oldest_id, page2.meta().oldest_id);
+    assert_ne!(page3.meta().oldest_id, page1.meta().oldest_id);
+
+    let res = page3.previous_page().await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
+    let res = res.unwrap();
+    assert!(res.is_some());
+    let page2_again = res.unwrap();
+    assert_eq!(page2_again.meta().oldest_id, page2.meta().oldest_id);
+}
+
+#[tokio::test]
+async fn get_tweets_search_recent() {
+    let api = get_api();
+    let res = api
+        .get_tweets_search_recent("from:TwitterDev -is:retweet")
+        .max_results(10)
+        .send()
+        .await;
+    assert!(res.is_ok(), "{}", res.unwrap_err());
 }
 
 #[tokio::test]

@@ -119,6 +119,13 @@ macro_rules! get_req_builder_arg {
             self
         }
     };
+    (sort_order) => {
+        pub fn sort_order(&mut self, sort_order: $crate::query::SortOrder) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_val("sort_order", sort_order);
+            self
+        }
+    };
 }
 
 macro_rules! get_req_builder {
@@ -139,7 +146,7 @@ macro_rules! get_req_builder {
                 Self { client: client.clone(), url, return_ty: Default::default() }
             }
             $($crate::query::get_req_builder_arg! { $optional_arg })*
-            pub async fn send(self) -> $crate::ApiResult<A, T, M> {
+            pub async fn send(&self) -> $crate::ApiResult<A, T, M> {
                 self.client
                     .send(self.client.request(Method::GET, self.url.clone())).await
             }

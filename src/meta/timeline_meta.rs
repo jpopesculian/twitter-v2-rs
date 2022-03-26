@@ -2,7 +2,7 @@ use super::pagination::PaginationMeta;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct TimelineMeta {
+pub struct TweetsMeta {
     pub result_count: usize,
     pub newest_id: String,
     pub oldest_id: String,
@@ -12,7 +12,7 @@ pub struct TimelineMeta {
     pub previous_token: Option<String>,
 }
 
-impl PaginationMeta for TimelineMeta {
+impl PaginationMeta for TweetsMeta {
     fn next_token(&self) -> Option<&str> {
         self.next_token.as_deref()
     }
