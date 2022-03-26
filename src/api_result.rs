@@ -5,22 +5,20 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct ApiResponseMeta {}
-
-#[derive(Deserialize, Serialize, Debug)]
 pub struct ApiResponse<T, M> {
     pub data: T,
+    #[serde(skip_serializing_if = "crate::utils::serde::is_null")]
     pub meta: M,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct ApiError {
-    title: String,
+    pub title: String,
     #[serde(rename = "type")]
-    kind: String,
+    pub kind: String,
     #[serde(with = "crate::utils::serde::status_code")]
-    status: StatusCode,
-    detail: String,
+    pub status: StatusCode,
+    pub detail: String,
 }
 
 impl fmt::Display for ApiError {
