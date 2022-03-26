@@ -1,11 +1,11 @@
 use super::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
-use crate::data::{Deleted, Tweet};
+use crate::data::{Deleted, Tweet, TweetsCount};
 use crate::id::IntoId;
-use crate::meta::TweetsMeta;
+use crate::meta::{NoMeta, TweetsMeta};
 use crate::query::{get_req_builder, UrlQueryExt};
-use crate::TweetBuilder;
+use crate::{TweetBuilder, TweetsCountsMeta};
 use reqwest::Method;
 
 get_req_builder! {
@@ -56,6 +56,16 @@ pub struct GetTweetsSearchRequestBuilder {
 }
 }
 
+get_req_builder! {
+pub struct GetTweetsCountsRequestBuilder {
+    start_time,
+    end_time,
+    since_id,
+    until_id,
+    granularity
+}
+}
+
 impl<A> TwitterApi<A>
 where
     A: Authorization,
@@ -63,12 +73,12 @@ where
     pub fn get_tweets(
         &self,
         ids: impl IntoIterator<Item = impl IntoId>,
-    ) -> GetTweetsRequestBuilder<A, Vec<Tweet>, Option<()>> {
+    ) -> GetTweetsRequestBuilder<A, Vec<Tweet>, NoMeta> {
         let mut url = self.url("tweets").unwrap();
         url.append_query_seq("ids", ids);
         GetTweetsRequestBuilder::new(self, url)
     }
-    pub fn get_tweet(&self, id: impl IntoId) -> GetTweetsRequestBuilder<A, Tweet, Option<()>> {
+    pub fn get_tweet(&self, id: impl IntoId) -> GetTweetsRequestBuilder<A, Tweet, NoMeta> {
         GetTweetsRequestBuilder::new(self, self.url(format!("tweets/{id}")).unwrap())
     }
     pub fn get_user_tweets(
@@ -99,10 +109,26 @@ where
         url.append_query_val("query", query);
         GetTweetsSearchRequestBuilder::new(self, url)
     }
+    pub fn get_tweets_counts_recent(
+        &self,
+        query: impl ToString,
+    ) -> GetTweetsCountsRequestBuilder<A, Vec<TweetsCount>, TweetsCountsMeta> {
+        let mut url = self.url("tweets/counts/recent").unwrap();
+        url.append_query_val("query", query);
+        GetTweetsCountsRequestBuilder::new(self, url)
+    }
+    pub fn get_tweets_counts_all(
+        &self,
+        query: impl ToString,
+    ) -> GetTweetsCountsRequestBuilder<A, Vec<TweetsCount>, TweetsCountsMeta> {
+        let mut url = self.url("tweets/counts/all").unwrap();
+        url.append_query_val("query", query);
+        GetTweetsCountsRequestBuilder::new(self, url)
+    }
     pub fn post_tweet(&self) -> TweetBuilder<A> {
         TweetBuilder::new(self, self.url("tweets").unwrap())
     }
-    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, Option<()>> {
+    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, NoMeta> {
         self.send(self.request(Method::DELETE, self.url(format!("tweets/{id}"))?))
             .await
     }

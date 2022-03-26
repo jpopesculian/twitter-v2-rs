@@ -5,6 +5,7 @@ mod media;
 mod metric;
 mod space;
 mod tweet;
+mod tweets_count;
 mod user;
 mod withheld;
 
@@ -15,5 +16,6 @@ pub use media::*;
 pub use metric::*;
 pub use space::*;
 pub use tweet::*;
+pub use tweets_count::*;
 pub use user::*;
 pub use withheld::*;

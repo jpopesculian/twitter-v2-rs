@@ -126,6 +126,13 @@ macro_rules! get_req_builder_arg {
             self
         }
     };
+    (granularity) => {
+        pub fn granularity(&mut self, granularity: $crate::query::Granularity) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_val("granularity", granularity);
+            self
+        }
+    };
 }
 
 macro_rules! get_req_builder {

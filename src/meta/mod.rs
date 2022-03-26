@@ -1,5 +1,9 @@
 mod pagination;
-mod timeline_meta;
+mod tweets;
+mod tweets_counts;
+
+pub type NoMeta = Option<()>;
 
 pub use pagination::*;
-pub use timeline_meta::*;
+pub use tweets::*;
+pub use tweets_counts::*;
