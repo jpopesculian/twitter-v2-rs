@@ -28,6 +28,10 @@ where
         }
     }
 
+    pub fn auth(&self) -> &A {
+        &self.auth
+    }
+
     pub(crate) fn url(&self, url: impl AsRef<str>) -> Result<Url> {
         Ok(self.base_url.join(url.as_ref())?)
     }

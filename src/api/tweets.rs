@@ -3,9 +3,9 @@ use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{Deleted, Tweet, TweetsCount};
 use crate::id::IntoId;
-use crate::meta::{NoMeta, TweetsMeta};
+use crate::meta::{NoMeta, TweetsCountsMeta, TweetsMeta};
 use crate::query::{get_req_builder, UrlQueryExt};
-use crate::{TweetBuilder, TweetsCountsMeta};
+use crate::requests::{StreamRuleBuilder, TweetBuilder};
 use reqwest::Method;
 
 get_req_builder! {
@@ -124,6 +124,9 @@ where
         let mut url = self.url("tweets/counts/all").unwrap();
         url.append_query_val("query", query);
         GetTweetsCountsRequestBuilder::new(self, url)
+    }
+    pub fn post_tweets_search_stream_rule(&self) -> StreamRuleBuilder<A> {
+        StreamRuleBuilder::new(self, self.url("tweets/search/stream/rules").unwrap())
     }
     pub fn post_tweet(&self) -> TweetBuilder<A> {
         TweetBuilder::new(self, self.url("tweets").unwrap())

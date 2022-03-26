@@ -6,6 +6,7 @@ use crate::query::UrlQueryExt;
 use async_trait::async_trait;
 use reqwest::{Method, Response, StatusCode};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fmt;
 use url::Url;
 
@@ -17,13 +18,21 @@ pub(crate) struct InnerApiResponse<T, M> {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct ApiErrorItem {
+    parameters: HashMap<String, Vec<serde_json::Value>>,
+    message: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, Default)]
 pub struct ApiError {
     pub title: String,
     #[serde(rename = "type")]
     pub kind: String,
-    #[serde(with = "crate::utils::serde::status_code")]
+    #[serde(default, with = "crate::utils::serde::status_code")]
     pub status: StatusCode,
     pub detail: String,
+    #[serde(default)]
+    pub errors: Vec<ApiErrorItem>,
 }
 
 impl fmt::Display for ApiError {
@@ -153,16 +162,18 @@ impl ApiResponseExt for Response {
             Ok(self.json().await?)
         } else {
             let text = self.text().await?;
-            Err(Error::Api(if let Ok(error) = serde_json::from_str(&text) {
-                error
-            } else {
-                ApiError {
-                    title: String::new(),
-                    kind: String::new(),
-                    status,
-                    detail: text,
-                }
-            }))
+            Err(Error::Api(
+                if let Ok(mut error) = serde_json::from_str::<ApiError>(&text) {
+                    error.status = status;
+                    error
+                } else {
+                    ApiError {
+                        status,
+                        detail: text,
+                        ..Default::default()
+                    }
+                },
+            ))
         }
     }
 }
