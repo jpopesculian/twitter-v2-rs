@@ -90,7 +90,7 @@ where
         }
         self
     }
-    pub async fn send(&self) -> ApiResult<A, Option<Vec<StreamRule>>, StreamRuleMeta> {
+    pub async fn send(&self) -> ApiResult<A, Vec<StreamRule>, StreamRuleMeta> {
         self.client
             .send(
                 self.client

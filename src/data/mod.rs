@@ -1,5 +1,6 @@
 mod deleted;
 mod entity;
+mod expansions;
 mod list;
 mod media;
 mod metric;
@@ -12,6 +13,7 @@ mod withheld;
 
 pub use deleted::*;
 pub use entity::*;
+pub use expansions::*;
 pub use list::*;
 pub use media::*;
 pub use metric::*;

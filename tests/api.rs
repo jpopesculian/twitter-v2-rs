@@ -1,3 +1,4 @@
+use futures::prelude::*;
 use rand::distributions::{Alphanumeric, DistString};
 use std::ops::Deref;
 use std::sync::Mutex;
@@ -26,7 +27,7 @@ async fn get_token() -> Oauth2Token {
             .try_into()
             .unwrap();
         serde_json::to_writer(
-            std::fs::File::open("./.oauth2_token.json").expect(".oauth2_token.json not found"),
+            std::fs::File::create("./.oauth2_token.json").expect(".oauth2_token.json not found"),
             token.deref(),
         )
         .expect("couldn't save token");
@@ -149,20 +150,38 @@ async fn get_tweets_counts_recent() -> Result<()> {
 
 #[tokio::test]
 async fn manage_tweets_search_stream_rule() -> Result<()> {
-    let res = get_api_app_ctx()
+    let api = get_api_app_ctx();
+    let res = api
         .post_tweets_search_stream_rule()
         .add("from:TwitterDev -is:retweet")
         .send()
         .await?;
-    let res = get_api_app_ctx()
-        .get_tweets_search_stream_rules()
-        .send()
-        .await?;
-    let res = get_api_app_ctx()
+    assert_eq!(res.meta().unwrap().summary.valid, Some(1));
+    assert_eq!(res.meta().unwrap().summary.created, Some(1));
+    let id = res.into_data().unwrap().pop().unwrap().id;
+
+    let res = api.get_tweets_search_stream_rules().send().await?;
+    assert_eq!(res.into_data().unwrap().pop().unwrap().id, id);
+
+    let res = api
         .post_tweets_search_stream_rule()
-        .delete_id(1508010426864476163)
+        .delete_id(id)
         .send()
         .await?;
+    assert_eq!(res.meta().unwrap().summary.deleted, Some(1));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn get_tweets_sample_stream() -> Result<()> {
+    let res = get_api_app_ctx()
+        .get_tweets_sample_stream()
+        .stream()
+        .await?
+        .try_next()
+        .await?;
+    assert!(res.is_some());
     Ok(())
 }
 

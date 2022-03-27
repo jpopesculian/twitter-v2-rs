@@ -1,5 +1,6 @@
 use crate::api::TwitterApi;
 use crate::authorization::Authorization;
+use crate::data::Expansions;
 use crate::error::{Error, Result};
 use crate::meta::PaginationMeta;
 use crate::query::UrlQueryExt;
@@ -7,15 +8,46 @@ use async_trait::async_trait;
 use reqwest::{Method, Response, StatusCode};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fmt;
+use std::{fmt, ops};
 use url::Url;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub(crate) struct InnerApiResponse<T, M> {
+pub struct ApiPayload<T, M> {
     #[serde(skip_serializing_if = "Option::is_none")]
-    data: Option<T>,
+    pub data: Option<T>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    meta: Option<M>,
+    pub meta: Option<M>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub includes: Option<Vec<Expansions>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub errors: Option<Vec<ApiError>>,
+}
+
+impl<T, M> ApiPayload<T, M> {
+    pub fn data(&self) -> Option<&T> {
+        self.data.as_ref()
+    }
+    pub fn meta(&self) -> Option<&M> {
+        self.meta.as_ref()
+    }
+    pub fn includes(&self) -> Option<&[Expansions]> {
+        self.includes.as_deref()
+    }
+    pub fn errors(&self) -> Option<&[ApiError]> {
+        self.errors.as_deref()
+    }
+    pub fn into_data(self) -> Option<T> {
+        self.data
+    }
+    pub fn into_meta(self) -> Option<M> {
+        self.meta
+    }
+    pub fn into_includes(self) -> Option<Vec<Expansions>> {
+        self.includes
+    }
+    pub fn into_errors(self) -> Option<Vec<ApiError>> {
+        self.errors
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -49,31 +81,44 @@ impl std::error::Error for ApiError {}
 pub struct ApiResponse<A, T, M> {
     client: TwitterApi<A>,
     url: Url,
-    response: InnerApiResponse<T, M>,
+    payload: ApiPayload<T, M>,
 }
 
 impl<A, T, M> ApiResponse<A, T, M> {
-    pub(crate) fn new(client: &TwitterApi<A>, url: Url, response: InnerApiResponse<T, M>) -> Self {
+    pub(crate) fn new(client: &TwitterApi<A>, url: Url, payload: ApiPayload<T, M>) -> Self {
         Self {
             client: client.clone(),
             url,
-            response,
+            payload,
         }
     }
     pub fn url(&self) -> &Url {
         &self.url
     }
-    pub fn data(&self) -> Option<&T> {
-        self.response.data.as_ref()
+    pub fn payload(&self) -> &ApiPayload<T, M> {
+        &self.payload
     }
-    pub fn meta(&self) -> Option<&M> {
-        self.response.meta.as_ref()
+    pub fn into_payload(self) -> ApiPayload<T, M> {
+        self.payload
     }
     pub fn into_data(self) -> Option<T> {
-        self.response.data
+        self.payload.data
     }
     pub fn into_meta(self) -> Option<M> {
-        self.response.meta
+        self.payload.meta
+    }
+    pub fn into_includes(self) -> Option<Vec<Expansions>> {
+        self.payload.includes
+    }
+    pub fn into_errors(self) -> Option<Vec<ApiError>> {
+        self.payload.errors
+    }
+}
+
+impl<A, T, M> ops::Deref for ApiResponse<A, T, M> {
+    type Target = ApiPayload<T, M>;
+    fn deref(&self) -> &Self::Target {
+        &self.payload
     }
 }
 
@@ -86,7 +131,7 @@ where
     where
         S: serde::Serializer,
     {
-        self.response.serialize(serializer)
+        self.payload.serialize(serializer)
     }
 }
 
@@ -99,7 +144,7 @@ where
         Self {
             client: self.client.clone(),
             url: self.url.clone(),
-            response: self.response.clone(),
+            payload: self.payload.clone(),
         }
     }
 }
@@ -148,20 +193,16 @@ where
 pub type ApiResult<A, T, M> = Result<ApiResponse<A, T, M>>;
 
 #[async_trait]
-pub(crate) trait ApiResponseExt {
-    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(
-        self,
-    ) -> Result<InnerApiResponse<T, M>>;
+pub(crate) trait ApiResponseExt: Sized {
+    async fn api_error_for_status(self) -> Result<Self>;
 }
 
 #[async_trait]
 impl ApiResponseExt for Response {
-    async fn api_json<T: DeserializeOwned, M: DeserializeOwned>(
-        self,
-    ) -> Result<InnerApiResponse<T, M>> {
+    async fn api_error_for_status(self) -> Result<Self> {
         let status = self.status();
         if status.is_success() {
-            Ok(self.json().await?)
+            Ok(self)
         } else {
             let text = self.text().await?;
             Err(Error::Api(

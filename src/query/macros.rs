@@ -140,10 +140,42 @@ macro_rules! get_req_builder_arg {
             self
         }
     };
+    (backfill) => {
+        pub fn backfill(&mut self, backfill: std::time::Duration) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url
+                .append_query_val("backfill_minutes", backfill.as_secs() / 60);
+            self
+        }
+    };
+}
+
+macro_rules! get_req_builder_verb {
+    (send) => {
+        pub async fn send(&self) -> $crate::ApiResult<A, T, M> {
+            self.client
+                .send(self.client.request(Method::GET, self.url.clone()))
+                .await
+        }
+    };
+    (stream) => {
+        pub async fn stream(
+            &self,
+        ) -> $crate::Result<
+            impl futures::stream::Stream<Item = $crate::Result<$crate::ApiPayload<T, M>>>,
+        > {
+            self.client
+                .stream(self.client.request(Method::GET, self.url.clone()))
+                .await
+        }
+    };
 }
 
 macro_rules! get_req_builder {
     ($vis:vis struct $class:ident { $($optional_arg:tt),* }) => {
+        get_req_builder!{#[send] $vis struct $class { $($optional_arg),* }}
+    };
+    (#[$verb:tt] $vis:vis struct $class:ident { $($optional_arg:tt),* }) => {
         $vis struct $class<A, T, M> {
             client: $crate::TwitterApi<A>,
             url: url::Url,
@@ -160,10 +192,7 @@ macro_rules! get_req_builder {
                 Self { client: client.clone(), url, return_ty: Default::default() }
             }
             $($crate::query::get_req_builder_arg! { $optional_arg })*
-            pub async fn send(&self) -> $crate::ApiResult<A, T, M> {
-                self.client
-                    .send(self.client.request(Method::GET, self.url.clone())).await
-            }
+            $crate::query::get_req_builder_verb! { $verb }
         }
 
         impl<A, T, M> Clone for $class<A, T, M> {
@@ -180,3 +209,4 @@ macro_rules! get_req_builder {
 
 pub(crate) use get_req_builder;
 pub(crate) use get_req_builder_arg;
+pub(crate) use get_req_builder_verb;

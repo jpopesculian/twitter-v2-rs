@@ -1,9 +1,11 @@
 mod tweets;
 mod users;
 
-use crate::api_result::{ApiResponse, ApiResponseExt, ApiResult};
+use crate::api_result::{ApiPayload, ApiResponse, ApiResponseExt, ApiResult};
 use crate::authorization::Authorization;
 use crate::error::Result;
+use crate::utils::JsonStream;
+use futures::prelude::*;
 use reqwest::header::AUTHORIZATION;
 use reqwest::{Client, IntoUrl, Method, Url};
 use serde::de::DeserializeOwned;
@@ -48,8 +50,32 @@ where
         let authorization = self.auth.header(&req).await?;
         let _ = req.headers_mut().insert(AUTHORIZATION, authorization);
         let url = req.url().clone();
-        let response = self.client.execute(req).await?.api_json().await?;
+        let response = self
+            .client
+            .execute(req)
+            .await?
+            .api_error_for_status()
+            .await?
+            .json()
+            .await?;
         Ok(ApiResponse::new(self, url, response))
+    }
+
+    pub(crate) async fn stream<T: DeserializeOwned, M: DeserializeOwned>(
+        &self,
+        req: reqwest::RequestBuilder,
+    ) -> Result<impl Stream<Item = Result<ApiPayload<T, M>>>> {
+        let mut req = req.build()?;
+        let authorization = self.auth.header(&req).await?;
+        let _ = req.headers_mut().insert(AUTHORIZATION, authorization);
+        Ok(JsonStream::new(
+            self.client
+                .execute(req)
+                .await?
+                .api_error_for_status()
+                .await?
+                .bytes_stream(),
+        ))
     }
 }
 

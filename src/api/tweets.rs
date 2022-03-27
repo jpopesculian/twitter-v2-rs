@@ -72,6 +72,19 @@ pub struct GetStreamRulesRequestBuilder {
 }
 }
 
+get_req_builder! {
+#[stream]
+pub struct GetTweetsStreamRequestBuilder {
+    media_fields,
+    user_fields,
+    poll_fields,
+    tweet_fields,
+    place_fields,
+    tweet_expansions,
+    backfill
+}
+}
+
 impl<A> TwitterApi<A>
 where
     A: Authorization,
@@ -86,6 +99,13 @@ where
     }
     pub fn get_tweet(&self, id: impl IntoId) -> GetTweetsRequestBuilder<A, Tweet, ()> {
         GetTweetsRequestBuilder::new(self, self.url(format!("tweets/{id}")).unwrap())
+    }
+    pub fn post_tweet(&self) -> TweetBuilder<A> {
+        TweetBuilder::new(self, self.url("tweets").unwrap())
+    }
+    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, ()> {
+        self.send(self.request(Method::DELETE, self.url(format!("tweets/{id}"))?))
+            .await
     }
     pub fn get_user_tweets(
         &self,
@@ -136,14 +156,13 @@ where
     ) -> GetStreamRulesRequestBuilder<A, Vec<StreamRule>, SentMeta> {
         GetStreamRulesRequestBuilder::new(self, self.url("tweets/search/stream/rules").unwrap())
     }
+    pub fn get_tweets_search_stream(&self) -> GetTweetsStreamRequestBuilder<A, Tweet, SentMeta> {
+        GetTweetsStreamRequestBuilder::new(self, self.url("tweets/search/stream").unwrap())
+    }
     pub fn post_tweets_search_stream_rule(&self) -> StreamRuleBuilder<A> {
         StreamRuleBuilder::new(self, self.url("tweets/search/stream/rules").unwrap())
     }
-    pub fn post_tweet(&self) -> TweetBuilder<A> {
-        TweetBuilder::new(self, self.url("tweets").unwrap())
-    }
-    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, ()> {
-        self.send(self.request(Method::DELETE, self.url(format!("tweets/{id}"))?))
-            .await
+    pub fn get_tweets_sample_stream(&self) -> GetTweetsStreamRequestBuilder<A, Tweet, SentMeta> {
+        GetTweetsStreamRequestBuilder::new(self, self.url("tweets/sample/stream").unwrap())
     }
 }
