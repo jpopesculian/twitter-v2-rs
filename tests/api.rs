@@ -186,6 +186,35 @@ async fn get_tweets_sample_stream() -> Result<()> {
 }
 
 #[tokio::test]
+async fn get_tweet_retweeted_by() -> Result<()> {
+    let _ = get_api_app_ctx()
+        .get_tweet_retweeted_by(1354143047324299264)
+        .send()
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn post_user_retweet() -> Result<()> {
+    let api = get_api_user_ctx().await;
+    let me = api.get_users_me().send().await?.into_data().unwrap();
+    let res = api.post_user_retweet(me.id, 1228393702244134912).await?;
+    assert!(res.data().unwrap().retweeted);
+    let res = api.delete_user_retweet(me.id, 1228393702244134912).await?;
+    assert!(!res.data().unwrap().retweeted);
+    Ok(())
+}
+
+#[tokio::test]
+async fn get_tweet_quote_tweets() -> Result<()> {
+    let _ = get_api_app_ctx()
+        .get_tweet_quote_tweets(1354143047324299264)
+        .send()
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
 async fn get_users_by() -> Result<()> {
     let res = get_api_user_ctx()
         .await

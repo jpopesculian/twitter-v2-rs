@@ -1,11 +1,11 @@
 use super::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
-use crate::data::{Deleted, StreamRule, Tweet, TweetsCount};
+use crate::data::{Deleted, Retweeted, StreamRule, Tweet, TweetsCount, User};
 use crate::id::IntoId;
-use crate::meta::{SentMeta, TweetsCountsMeta, TweetsMeta};
+use crate::meta::{ResultCountMeta, SentMeta, TweetsCountsMeta, TweetsMeta};
 use crate::query::{get_req_builder, UrlQueryExt};
-use crate::requests::{StreamRuleBuilder, TweetBuilder};
+use crate::requests::{StreamRuleBuilder, TweetBuilder, TweetId};
 use reqwest::Method;
 
 get_req_builder! {
@@ -82,6 +82,32 @@ pub struct GetTweetsStreamRequestBuilder {
     place_fields,
     tweet_expansions,
     backfill
+}
+}
+
+get_req_builder! {
+pub struct GetRetweetedByRequestBuilder {
+    media_fields,
+    user_fields,
+    poll_fields,
+    tweet_fields,
+    place_fields,
+    user_expansions,
+    max_results,
+    pagination_token
+}
+}
+
+get_req_builder! {
+pub struct GetQuoteTweetsRequestBuilder {
+    media_fields,
+    user_fields,
+    poll_fields,
+    tweet_fields,
+    place_fields,
+    tweet_expansions,
+    max_results,
+    pagination_token
 }
 }
 
@@ -164,5 +190,45 @@ where
     }
     pub fn get_tweets_sample_stream(&self) -> GetTweetsStreamRequestBuilder<A, Tweet, SentMeta> {
         GetTweetsStreamRequestBuilder::new(self, self.url("tweets/sample/stream").unwrap())
+    }
+    pub fn get_tweet_retweeted_by(
+        &self,
+        id: impl IntoId,
+    ) -> GetRetweetedByRequestBuilder<A, Vec<User>, ResultCountMeta> {
+        GetRetweetedByRequestBuilder::new(
+            self,
+            self.url(format!("tweets/{id}/retweeted_by")).unwrap(),
+        )
+    }
+    pub async fn post_user_retweet(
+        &self,
+        user_id: impl IntoId,
+        tweet_id: impl IntoId,
+    ) -> ApiResult<A, Retweeted, ()> {
+        self.send(
+            self.request(Method::POST, self.url(format!("users/{user_id}/retweets"))?)
+                .json(&TweetId::from(tweet_id)),
+        )
+        .await
+    }
+    pub async fn delete_user_retweet(
+        &self,
+        user_id: impl IntoId,
+        tweet_id: impl IntoId,
+    ) -> ApiResult<A, Retweeted, ()> {
+        self.send(self.request(
+            Method::DELETE,
+            self.url(format!("users/{user_id}/retweets/{tweet_id}"))?,
+        ))
+        .await
+    }
+    pub fn get_tweet_quote_tweets(
+        &self,
+        id: impl IntoId,
+    ) -> GetQuoteTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
+        GetQuoteTweetsRequestBuilder::new(
+            self,
+            self.url(format!("tweets/{id}/quote_tweets")).unwrap(),
+        )
     }
 }
