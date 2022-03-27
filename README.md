@@ -5,7 +5,9 @@ with more endpoints being added soon
 
 ## Features
 
-* `oauth2`: Included by default. See the examples for how to use.
+* **oauth2**: Included by default. See the examples for how to use.
+* **rustls-tls**: Use `rustls` as TLS backend
+* **native-tls**: Use `native-tls` as TLS backend
 
 ## Example
 
