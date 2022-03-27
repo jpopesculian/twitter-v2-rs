@@ -15,13 +15,13 @@ use twitter_v2::{
     oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier},
     TwitterApi,
 };
-use twitter_v2::{NoCallback, Oauth2Client, RefreshableOauth2Token, Scope};
+use twitter_v2::{Oauth2Client, Oauth2Token, Scope};
 
 pub struct Oauth2Ctx {
     client: Oauth2Client,
     verifier: Option<PkceCodeVerifier>,
     state: Option<CsrfToken>,
-    token: Option<RefreshableOauth2Token<NoCallback>>,
+    token: Option<Oauth2Token>,
 }
 
 async fn login(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
@@ -95,13 +95,25 @@ async fn callback(
 
 async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
     // get oauth token
-    let oauth_token = ctx
-        .lock()
-        .unwrap()
-        .token
-        .as_ref()
-        .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?
-        .clone();
+    let (mut oauth_token, oauth_client) = {
+        let ctx = ctx.lock().unwrap();
+        let token = ctx
+            .token
+            .as_ref()
+            .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?
+            .clone();
+        let client = ctx.client.clone();
+        (token, client)
+    };
+    // refresh oauth token if expired
+    if oauth_client
+        .refresh_token_if_expired(&mut oauth_token)
+        .await
+        .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?
+    {
+        // save oauth token if refreshed
+        ctx.lock().unwrap().token = Some(oauth_token.clone());
+    }
     let api = TwitterApi::new(oauth_token);
     // get tweet by id
     let tweet = api
@@ -114,15 +126,19 @@ async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
 
 async fn revoke(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
     // get oauth token
-    let oauth_token = ctx
-        .lock()
-        .unwrap()
-        .token
-        .clone()
-        .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?;
+    let (oauth_token, oauth_client) = {
+        let ctx = ctx.lock().unwrap();
+        let token = ctx
+            .token
+            .as_ref()
+            .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?
+            .clone();
+        let client = ctx.client.clone();
+        (token, client)
+    };
     // revoke token
-    oauth_token
-        .revoke()
+    oauth_client
+        .revoke_token(oauth_token.revokable_token())
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
     Ok::<_, (StatusCode, String)>("Token revoked!")
@@ -138,8 +154,7 @@ async fn debug_token(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl I
         .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))?
         .clone();
     // get underlying token
-    let serializable_token = oauth_token.token().await.clone();
-    Ok::<_, (StatusCode, String)>(Json(serializable_token))
+    Ok::<_, (StatusCode, String)>(Json(oauth_token))
 }
 
 #[tokio::main]

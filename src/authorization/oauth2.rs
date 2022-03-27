@@ -114,14 +114,14 @@ impl Oauth2Client {
         &self,
         code: AuthorizationCode,
         verifier: PkceCodeVerifier,
-    ) -> Result<RefreshableOauth2Token<NoCallback>> {
+    ) -> Result<Oauth2Token> {
         let res = self
             .0
             .exchange_code(code)
             .set_pkce_verifier(verifier)
             .request_async(oauth2::reqwest::async_http_client)
             .await?;
-        Ok(RefreshableOauth2Token::new(self.clone(), res.try_into()?))
+        res.try_into()
     }
 
     pub async fn revoke_token(&self, token: StandardRevocableToken) -> Result<()> {
@@ -133,12 +133,25 @@ impl Oauth2Client {
             .await?)
     }
 
-    pub async fn refresh_token(&self, token: &RefreshToken) -> Result<BasicTokenResponse> {
-        Ok(self
-            .0
+    pub async fn refresh_token(&self, token: &RefreshToken) -> Result<Oauth2Token> {
+        self.0
             .exchange_refresh_token(token)
             .request_async(oauth2::reqwest::async_http_client)
-            .await?)
+            .await?
+            .try_into()
+    }
+
+    pub async fn refresh_token_if_expired(&self, token: &mut Oauth2Token) -> Result<bool> {
+        if token.is_expired() {
+            if let Some(refresh_token) = token.refresh_token() {
+                *token = self.refresh_token(refresh_token).await?;
+                Ok(true)
+            } else {
+                Err(Error::NoRefreshToken)
+            }
+        } else {
+            Ok(false)
+        }
     }
 }
 
@@ -266,11 +279,10 @@ where
 {
     pub async fn refresh(&self) -> Result<()> {
         let mut token = self.token.write().await;
-        let res = self
+        *token = self
             .oauth_client
             .refresh_token(token.refresh_token.as_ref().ok_or(Error::NoRefreshToken)?)
             .await?;
-        *token = res.try_into()?;
         (self.callback)(token.clone()).await?;
         Ok(())
     }
@@ -284,12 +296,11 @@ where
 {
     async fn header(&self, request: &Request) -> Result<HeaderValue> {
         let mut token = self.token.write().await;
-        if token.is_expired() {
-            let res = self
-                .oauth_client
-                .refresh_token(token.refresh_token.as_ref().ok_or(Error::NoRefreshToken)?)
-                .await?;
-            *token = res.try_into()?;
+        if self
+            .oauth_client
+            .refresh_token_if_expired(&mut token)
+            .await?
+        {
             (self.callback)(token.clone()).await?;
         }
         token.header(request).await

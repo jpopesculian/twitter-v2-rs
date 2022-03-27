@@ -13,19 +13,17 @@ lazy_static::lazy_static! {
     .expect(".oauth2_token.json not valid json"));
 }
 async fn get_token() -> Oauth2Token {
+    let oauth2_client = Oauth2Client::new(
+        std::env::var("CLIENT_ID").expect("could not find CLIENT_ID"),
+        std::env::var("CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
+        "http://localhost:3000/callback".parse().unwrap(),
+    );
     let mut token = OAUTH2_TOKEN.lock().unwrap();
-    if token.is_expired() {
-        let oauth2_client = Oauth2Client::new(
-            std::env::var("CLIENT_ID").expect("could not find CLIENT_ID"),
-            std::env::var("CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
-            "http://localhost:3000/callback".parse().unwrap(),
-        );
-        *token = oauth2_client
-            .refresh_token(token.refresh_token().unwrap())
-            .await
-            .unwrap()
-            .try_into()
-            .unwrap();
+    if oauth2_client
+        .refresh_token_if_expired(&mut token)
+        .await
+        .unwrap()
+    {
         serde_json::to_writer(
             std::fs::File::create("./.oauth2_token.json").expect(".oauth2_token.json not found"),
             token.deref(),
