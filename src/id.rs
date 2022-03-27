@@ -35,6 +35,17 @@ impl fmt::Display for Id {
     }
 }
 
+impl PartialEq<u64> for Id {
+    fn eq(&self, other: &u64) -> bool {
+        &self.0 == other
+    }
+}
+impl PartialEq<&u64> for Id {
+    fn eq(&self, other: &&u64) -> bool {
+        &self.0 == *other
+    }
+}
+
 impl Serialize for Id {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

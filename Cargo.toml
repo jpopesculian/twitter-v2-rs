@@ -1,7 +1,15 @@
 [package]
-name = "twitter_v2"
+name = "twitter-v2"
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/jpopesculian/twitter-v2-rs"
+documentation = "https://docs.rs/twitter-v2/"
+repository = "https://github.com/jpopesculian/twitter-v2-rs"
+description = "Twitter API v2"
+keywords = ["twitter", "v2", "api", "client", "oauth"]
+categories = ["web-programming::http-client"]
 
 [features]
 default = ["oauth2", "rustls-tls"]
@@ -32,4 +40,5 @@ rand = "0.8.5"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.2.5", features = ["trace"] }
 tracing = "0.1.32"
+time = { version = "0.3", features = ["macros"] }
 tracing-subscriber = { version = "0.3.9", features = ["env-filter"] }

@@ -61,6 +61,7 @@ async fn get_tweet() -> Result<()> {
     let _ = get_api_user_ctx()
         .await
         .get_tweet(1261326399320715264)
+        .tweet_fields([twitter_v2::query::TweetField::AuthorId])
         .send()
         .await?;
     Ok(())
