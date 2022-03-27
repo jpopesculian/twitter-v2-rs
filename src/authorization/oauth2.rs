@@ -11,6 +11,7 @@ use reqwest::header::HeaderValue;
 use reqwest::Request;
 use serde::{Deserialize, Serialize};
 use std::convert::{TryFrom, TryInto};
+use std::future::Future;
 use std::sync::Arc;
 use strum::{Display, EnumString};
 use time::OffsetDateTime;
@@ -113,7 +114,7 @@ impl Oauth2Client {
         &self,
         code: AuthorizationCode,
         verifier: PkceCodeVerifier,
-    ) -> Result<RefreshableOauth2Token> {
+    ) -> Result<RefreshableOauth2Token<NoCallback>> {
         let res = self
             .0
             .exchange_code(code)
@@ -217,20 +218,36 @@ impl Authorization for Oauth2Token {
     }
 }
 
+fn no_op(_: Oauth2Token) -> futures::future::Ready<Result<()>> {
+    futures::future::ok(())
+}
+pub type NoCallback = fn(Oauth2Token) -> futures::future::Ready<Result<()>>;
+
 #[derive(Clone, Debug)]
-pub struct RefreshableOauth2Token {
+pub struct RefreshableOauth2Token<C> {
     oauth_client: Oauth2Client,
     token: Arc<RwLock<Oauth2Token>>,
+    callback: C,
 }
 
-impl RefreshableOauth2Token {
+impl RefreshableOauth2Token<NoCallback> {
     pub fn new(oauth_client: Oauth2Client, token: Oauth2Token) -> Self {
         Self {
             oauth_client,
             token: Arc::new(RwLock::new(token)),
+            callback: no_op,
         }
     }
+}
 
+impl<C> RefreshableOauth2Token<C> {
+    pub fn with_callback<T>(&self, callback: T) -> RefreshableOauth2Token<T> {
+        RefreshableOauth2Token {
+            oauth_client: self.oauth_client.clone(),
+            token: self.token.clone(),
+            callback,
+        }
+    }
     pub async fn token(&self) -> RwLockReadGuard<'_, Oauth2Token> {
         self.token.read().await
     }
@@ -240,7 +257,13 @@ impl RefreshableOauth2Token {
             .revoke_token(self.token.read().await.revokable_token())
             .await
     }
+}
 
+impl<C, F> RefreshableOauth2Token<C>
+where
+    C: Fn(Oauth2Token) -> F + Send + Sync,
+    F: Future<Output = Result<()>>,
+{
     pub async fn refresh(&self) -> Result<()> {
         let mut token = self.token.write().await;
         let res = self
@@ -248,12 +271,17 @@ impl RefreshableOauth2Token {
             .refresh_token(token.refresh_token.as_ref().ok_or(Error::NoRefreshToken)?)
             .await?;
         *token = res.try_into()?;
+        (self.callback)(token.clone()).await?;
         Ok(())
     }
 }
 
 #[async_trait]
-impl Authorization for RefreshableOauth2Token {
+impl<C, F> Authorization for RefreshableOauth2Token<C>
+where
+    C: Fn(Oauth2Token) -> F + Send + Sync,
+    F: Future<Output = Result<()>> + Send,
+{
     async fn header(&self, request: &Request) -> Result<HeaderValue> {
         let mut token = self.token.write().await;
         if token.is_expired() {
@@ -262,6 +290,7 @@ impl Authorization for RefreshableOauth2Token {
                 .refresh_token(token.refresh_token.as_ref().ok_or(Error::NoRefreshToken)?)
                 .await?;
             *token = res.try_into()?;
+            (self.callback)(token.clone()).await?;
         }
         token.header(request).await
     }

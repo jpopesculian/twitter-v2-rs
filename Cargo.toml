@@ -10,6 +10,7 @@ native-tls = ["oauth2/native-tls", "reqwest/native-tls"]
 
 [dependencies]
 async-trait = "0.1"
+futures = "0.3.21"
 oauth1 = { version = "0.5", package = "oauth1-request" }
 oauth2 = { version = "4.1", optional = true, default-features = false, features = ["reqwest"] }
 percent-encoding = "2.1.0"
@@ -25,6 +26,7 @@ url = "2.2"
 
 [dev-dependencies]
 axum = "0.4.8"
+lazy_static = "1.4.0"
 rand = "0.8.5"
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 tower-http = { version = "0.2.5", features = ["trace"] }

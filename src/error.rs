@@ -35,6 +35,14 @@ pub enum Error {
     #[cfg(feature = "oauth2")]
     #[error("No refresh token found. Try using the `offline.access` scope")]
     NoRefreshToken,
+    #[error("Other: {_0}")]
+    Custom(String),
+}
+
+impl Error {
+    pub fn custom(message: impl ToString) -> Self {
+        Self::Custom(message.to_string())
+    }
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;

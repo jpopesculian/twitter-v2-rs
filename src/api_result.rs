@@ -12,10 +12,10 @@ use url::Url;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub(crate) struct InnerApiResponse<T, M> {
-    #[serde(skip_serializing_if = "crate::utils::serde::is_null")]
-    data: T,
-    #[serde(skip_serializing_if = "crate::utils::serde::is_null")]
-    meta: M,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    data: Option<T>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    meta: Option<M>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -31,6 +31,7 @@ pub struct ApiError {
     pub kind: String,
     #[serde(default, with = "crate::utils::serde::status_code")]
     pub status: StatusCode,
+    #[serde(default)]
     pub detail: String,
     #[serde(default)]
     pub errors: Vec<ApiErrorItem>,
@@ -62,16 +63,16 @@ impl<A, T, M> ApiResponse<A, T, M> {
     pub fn url(&self) -> &Url {
         &self.url
     }
-    pub fn data(&self) -> &T {
-        &self.response.data
+    pub fn data(&self) -> Option<&T> {
+        self.response.data.as_ref()
     }
-    pub fn meta(&self) -> &M {
-        &self.response.meta
+    pub fn meta(&self) -> Option<&M> {
+        self.response.meta.as_ref()
     }
-    pub fn into_data(self) -> T {
+    pub fn into_data(self) -> Option<T> {
         self.response.data
     }
-    pub fn into_meta(self) -> M {
+    pub fn into_meta(self) -> Option<M> {
         self.response.meta
     }
 }
@@ -117,7 +118,7 @@ where
     M: PaginationMeta + DeserializeOwned + Send + Sync,
 {
     async fn next_page(&self) -> Result<Option<Self>> {
-        if let Some(token) = self.meta().next_token() {
+        if let Some(token) = self.meta().and_then(|m| m.next_token()) {
             let mut url = self.url.clone();
             url.replace_query_val("pagination_token", token);
             Ok(Some(
@@ -130,7 +131,7 @@ where
         }
     }
     async fn previous_page(&self) -> Result<Option<Self>> {
-        if let Some(token) = self.meta().previous_token() {
+        if let Some(token) = self.meta().and_then(|m| m.previous_token()) {
             let mut url = self.url.clone();
             url.replace_query_val("pagination_token", token);
             Ok(Some(

@@ -15,13 +15,13 @@ use twitter_v2::{
     oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier},
     TwitterApi,
 };
-use twitter_v2::{Oauth2Client, RefreshableOauth2Token, Scope};
+use twitter_v2::{NoCallback, Oauth2Client, RefreshableOauth2Token, Scope};
 
 pub struct Oauth2Ctx {
     client: Oauth2Client,
     verifier: Option<PkceCodeVerifier>,
     state: Option<CsrfToken>,
-    token: Option<RefreshableOauth2Token>,
+    token: Option<RefreshableOauth2Token<NoCallback>>,
 }
 
 async fn login(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {
@@ -109,7 +109,7 @@ async fn tweets(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoRe
         .send()
         .await
         .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
-    Ok::<_, (StatusCode, String)>(Json(tweet.data().clone()))
+    Ok::<_, (StatusCode, String)>(Json(tweet.into_data()))
 }
 
 async fn revoke(Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>) -> impl IntoResponse {

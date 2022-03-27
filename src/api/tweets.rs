@@ -3,7 +3,7 @@ use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{Deleted, StreamRule, Tweet, TweetsCount};
 use crate::id::IntoId;
-use crate::meta::{NoMeta, SentMeta, TweetsCountsMeta, TweetsMeta};
+use crate::meta::{SentMeta, TweetsCountsMeta, TweetsMeta};
 use crate::query::{get_req_builder, UrlQueryExt};
 use crate::requests::{StreamRuleBuilder, TweetBuilder};
 use reqwest::Method;
@@ -79,12 +79,12 @@ where
     pub fn get_tweets(
         &self,
         ids: impl IntoIterator<Item = impl IntoId>,
-    ) -> GetTweetsRequestBuilder<A, Vec<Tweet>, NoMeta> {
+    ) -> GetTweetsRequestBuilder<A, Vec<Tweet>, ()> {
         let mut url = self.url("tweets").unwrap();
         url.append_query_seq("ids", ids);
         GetTweetsRequestBuilder::new(self, url)
     }
-    pub fn get_tweet(&self, id: impl IntoId) -> GetTweetsRequestBuilder<A, Tweet, NoMeta> {
+    pub fn get_tweet(&self, id: impl IntoId) -> GetTweetsRequestBuilder<A, Tweet, ()> {
         GetTweetsRequestBuilder::new(self, self.url(format!("tweets/{id}")).unwrap())
     }
     pub fn get_user_tweets(
@@ -133,7 +133,7 @@ where
     }
     pub fn get_tweets_search_stream_rules(
         &self,
-    ) -> GetStreamRulesRequestBuilder<A, Option<Vec<StreamRule>>, SentMeta> {
+    ) -> GetStreamRulesRequestBuilder<A, Vec<StreamRule>, SentMeta> {
         GetStreamRulesRequestBuilder::new(self, self.url("tweets/search/stream/rules").unwrap())
     }
     pub fn post_tweets_search_stream_rule(&self) -> StreamRuleBuilder<A> {
@@ -142,7 +142,7 @@ where
     pub fn post_tweet(&self) -> TweetBuilder<A> {
         TweetBuilder::new(self, self.url("tweets").unwrap())
     }
-    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, NoMeta> {
+    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, ()> {
         self.send(self.request(Method::DELETE, self.url(format!("tweets/{id}"))?))
             .await
     }

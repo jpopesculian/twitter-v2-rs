@@ -2,7 +2,6 @@ use super::TwitterApi;
 use crate::authorization::Authorization;
 use crate::data::User;
 use crate::id::IntoId;
-use crate::meta::NoMeta;
 use crate::query::get_req_builder;
 use crate::utils::percent_encode;
 use crate::UrlQueryExt;
@@ -23,18 +22,18 @@ where
     pub fn get_users(
         &self,
         ids: impl IntoIterator<Item = impl IntoId>,
-    ) -> GetUsersRequestBuilder<A, Vec<User>, NoMeta> {
+    ) -> GetUsersRequestBuilder<A, Vec<User>, ()> {
         let mut url = self.url("users").unwrap();
         url.append_query_seq("ids", ids);
         GetUsersRequestBuilder::new(self, url)
     }
-    pub fn get_user(&self, id: impl IntoId) -> GetUsersRequestBuilder<A, User, NoMeta> {
+    pub fn get_user(&self, id: impl IntoId) -> GetUsersRequestBuilder<A, User, ()> {
         GetUsersRequestBuilder::new(self, self.url(format!("users/{id}")).unwrap())
     }
     pub fn get_users_by_usernames(
         &self,
         usernames: impl IntoIterator<Item = impl ToString>,
-    ) -> GetUsersRequestBuilder<A, Vec<User>, NoMeta> {
+    ) -> GetUsersRequestBuilder<A, Vec<User>, ()> {
         let mut url = self.url("users/by").unwrap();
         url.append_query_seq("usernames", usernames);
         GetUsersRequestBuilder::new(self, url)
@@ -42,7 +41,7 @@ where
     pub fn get_user_by_username(
         &self,
         username: impl ToString,
-    ) -> GetUsersRequestBuilder<A, User, NoMeta> {
+    ) -> GetUsersRequestBuilder<A, User, ()> {
         GetUsersRequestBuilder::new(
             self,
             self.url(format!(
@@ -52,7 +51,7 @@ where
             .unwrap(),
         )
     }
-    pub fn get_users_me(&self) -> GetUsersRequestBuilder<A, User, NoMeta> {
+    pub fn get_users_me(&self) -> GetUsersRequestBuilder<A, User, ()> {
         GetUsersRequestBuilder::new(self, self.url("users/me").unwrap())
     }
 }
