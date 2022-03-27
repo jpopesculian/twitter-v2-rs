@@ -11,11 +11,9 @@ use std::sync::{Arc, Mutex};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::prelude::*;
 
-use twitter_v2::{
-    oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier},
-    TwitterApi,
-};
-use twitter_v2::{Oauth2Client, Oauth2Token, Scope};
+use twitter_v2::authorization::{Oauth2Client, Oauth2Token, Scope};
+use twitter_v2::oauth2::{AuthorizationCode, CsrfToken, PkceCodeChallenge, PkceCodeVerifier};
+use twitter_v2::TwitterApi;
 
 pub struct Oauth2Ctx {
     client: Oauth2Client,

@@ -2,18 +2,8 @@ use super::TwitterApi;
 use crate::authorization::Authorization;
 use crate::data::User;
 use crate::id::IntoId;
-use crate::query::get_req_builder;
+use crate::query::{GetUsersRequestBuilder, UrlQueryExt};
 use crate::utils::percent_encode;
-use crate::UrlQueryExt;
-use reqwest::Method;
-
-get_req_builder! {
-pub struct GetUsersRequestBuilder {
-    user_fields,
-    tweet_fields,
-    user_expansions
-}
-}
 
 impl<A> TwitterApi<A>
 where

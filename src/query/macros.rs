@@ -9,7 +9,7 @@ macro_rules! get_req_builder_arg {
     (media_fields) => {
         pub fn media_fields(
             &mut self,
-            fields: impl IntoIterator<Item = $crate::MediaField>,
+            fields: impl IntoIterator<Item = $crate::query::MediaField>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("media.fields", fields);
@@ -19,7 +19,7 @@ macro_rules! get_req_builder_arg {
     (place_fields) => {
         pub fn place_fields(
             &mut self,
-            fields: impl IntoIterator<Item = $crate::PlaceField>,
+            fields: impl IntoIterator<Item = $crate::query::PlaceField>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("place.fields", fields);
@@ -29,7 +29,7 @@ macro_rules! get_req_builder_arg {
     (poll_fields) => {
         pub fn poll_fields(
             &mut self,
-            fields: impl IntoIterator<Item = $crate::PollField>,
+            fields: impl IntoIterator<Item = $crate::query::PollField>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("poll.fields", fields);
@@ -39,7 +39,7 @@ macro_rules! get_req_builder_arg {
     (user_fields) => {
         pub fn user_fields(
             &mut self,
-            fields: impl IntoIterator<Item = $crate::UserField>,
+            fields: impl IntoIterator<Item = $crate::query::UserField>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("user.fields", fields);
@@ -49,7 +49,7 @@ macro_rules! get_req_builder_arg {
     (tweet_fields) => {
         pub fn tweet_fields(
             &mut self,
-            fields: impl IntoIterator<Item = $crate::TweetField>,
+            fields: impl IntoIterator<Item = $crate::query::TweetField>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("tweet.fields", fields);
@@ -59,7 +59,7 @@ macro_rules! get_req_builder_arg {
     (tweet_expansions) => {
         pub fn expansions(
             &mut self,
-            expansions: impl IntoIterator<Item = $crate::TweetExpansion>,
+            expansions: impl IntoIterator<Item = $crate::query::TweetExpansion>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("expansions", expansions);
@@ -69,7 +69,7 @@ macro_rules! get_req_builder_arg {
     (user_expansions) => {
         pub fn expansions(
             &mut self,
-            expansions: impl IntoIterator<Item = $crate::UserExpansion>,
+            expansions: impl IntoIterator<Item = $crate::query::UserExpansion>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("expansions", expansions);
@@ -77,7 +77,10 @@ macro_rules! get_req_builder_arg {
         }
     };
     (exclude) => {
-        pub fn exclude(&mut self, exclude: impl IntoIterator<Item = $crate::Exclude>) -> &mut Self {
+        pub fn exclude(
+            &mut self,
+            exclude: impl IntoIterator<Item = $crate::query::Exclude>,
+        ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("exclude", exclude);
             self
@@ -154,7 +157,7 @@ macro_rules! get_req_builder_verb {
     (send) => {
         pub async fn send(&self) -> $crate::ApiResult<A, T, M> {
             self.client
-                .send(self.client.request(Method::GET, self.url.clone()))
+                .send(self.client.request(reqwest::Method::GET, self.url.clone()))
                 .await
         }
     };
@@ -165,7 +168,7 @@ macro_rules! get_req_builder_verb {
             impl futures::stream::Stream<Item = $crate::Result<$crate::ApiPayload<T, M>>>,
         > {
             self.client
-                .stream(self.client.request(Method::GET, self.url.clone()))
+                .stream(self.client.request(reqwest::Method::GET, self.url.clone()))
                 .await
         }
     };
@@ -184,11 +187,11 @@ macro_rules! get_req_builder {
 
         impl<A, T, M> $class<A, T, M>
         where
-            A: $crate::Authorization,
+            A: $crate::authorization::Authorization,
             T: serde::de::DeserializeOwned,
             M: serde::de::DeserializeOwned
         {
-            fn new(client: &$crate::TwitterApi<A>, url: url::Url) -> Self {
+            pub(crate) fn new(client: &$crate::TwitterApi<A>, url: url::Url) -> Self {
                 Self { client: client.clone(), url, return_ty: Default::default() }
             }
             $($crate::query::get_req_builder_arg! { $optional_arg })*

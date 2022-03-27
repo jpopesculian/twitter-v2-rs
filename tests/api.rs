@@ -2,9 +2,9 @@ use futures::prelude::*;
 use rand::distributions::{Alphanumeric, DistString};
 use std::ops::Deref;
 use std::sync::Mutex;
-use twitter_v2::{
-    BearerToken, Oauth2Client, Oauth2Token, PaginableApiResponse, Result, TwitterApi,
-};
+use twitter_v2::authorization::{BearerToken, Oauth2Client, Oauth2Token};
+use twitter_v2::prelude::*;
+use twitter_v2::{Result, TwitterApi};
 
 lazy_static::lazy_static! {
     static ref OAUTH2_TOKEN: Mutex<Oauth2Token> = Mutex::new(serde_json::from_reader(

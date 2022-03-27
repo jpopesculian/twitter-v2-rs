@@ -1,3 +1,4 @@
+mod builder;
 mod exclude;
 mod expansions;
 mod fields;
@@ -6,6 +7,7 @@ mod macros;
 mod sort_order;
 mod to_query;
 
+pub use builder::*;
 pub use exclude::*;
 pub use expansions::*;
 pub use fields::*;

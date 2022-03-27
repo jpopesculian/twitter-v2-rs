@@ -4,112 +4,13 @@ use crate::authorization::Authorization;
 use crate::data::{Deleted, Liked, Retweeted, StreamRule, Tweet, TweetsCount, User};
 use crate::id::IntoId;
 use crate::meta::{ResultCountMeta, SentMeta, TweetsCountsMeta, TweetsMeta};
-use crate::query::{get_req_builder, UrlQueryExt};
+use crate::query::{
+    GetRelatedTweetsRequestBuilder, GetStreamRulesRequestBuilder, GetTimelineRequestBuilder,
+    GetTweetUsersRequestBuilder, GetTweetsCountsRequestBuilder, GetTweetsRequestBuilder,
+    GetTweetsSearchRequestBuilder, GetTweetsStreamRequestBuilder, UrlQueryExt,
+};
 use crate::requests::{StreamRuleBuilder, TweetBuilder, TweetId};
 use reqwest::Method;
-
-get_req_builder! {
-pub struct GetTweetsRequestBuilder {
-    media_fields,
-    user_fields,
-    poll_fields,
-    tweet_fields,
-    place_fields,
-    tweet_expansions
-}
-}
-
-get_req_builder! {
-pub struct GetTimelineRequestBuilder {
-    media_fields,
-    user_fields,
-    poll_fields,
-    tweet_fields,
-    place_fields,
-    tweet_expansions,
-    exclude,
-    start_time,
-    end_time,
-    since_id,
-    until_id,
-    max_results,
-    pagination_token
-}
-}
-
-get_req_builder! {
-pub struct GetTweetsSearchRequestBuilder {
-    media_fields,
-    user_fields,
-    poll_fields,
-    tweet_fields,
-    place_fields,
-    tweet_expansions,
-    exclude,
-    start_time,
-    end_time,
-    since_id,
-    until_id,
-    max_results,
-    sort_order,
-    pagination_token
-}
-}
-
-get_req_builder! {
-pub struct GetTweetsCountsRequestBuilder {
-    start_time,
-    end_time,
-    since_id,
-    until_id,
-    granularity
-}
-}
-
-get_req_builder! {
-pub struct GetStreamRulesRequestBuilder {
-    ids
-}
-}
-
-get_req_builder! {
-#[stream]
-pub struct GetTweetsStreamRequestBuilder {
-    media_fields,
-    user_fields,
-    poll_fields,
-    tweet_fields,
-    place_fields,
-    tweet_expansions,
-    backfill
-}
-}
-
-get_req_builder! {
-pub struct GetTweetUsersRequestBuilder {
-    media_fields,
-    user_fields,
-    poll_fields,
-    tweet_fields,
-    place_fields,
-    user_expansions,
-    max_results,
-    pagination_token
-}
-}
-
-get_req_builder! {
-pub struct GetRelatedTweetsRequestBuilder {
-    media_fields,
-    user_fields,
-    poll_fields,
-    tweet_fields,
-    place_fields,
-    tweet_expansions,
-    max_results,
-    pagination_token
-}
-}
 
 impl<A> TwitterApi<A>
 where
