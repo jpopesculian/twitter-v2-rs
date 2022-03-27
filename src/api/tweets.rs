@@ -1,7 +1,7 @@
 use super::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
-use crate::data::{Deleted, Retweeted, StreamRule, Tweet, TweetsCount, User};
+use crate::data::{Deleted, Liked, Retweeted, StreamRule, Tweet, TweetsCount, User};
 use crate::id::IntoId;
 use crate::meta::{ResultCountMeta, SentMeta, TweetsCountsMeta, TweetsMeta};
 use crate::query::{get_req_builder, UrlQueryExt};
@@ -86,7 +86,7 @@ pub struct GetTweetsStreamRequestBuilder {
 }
 
 get_req_builder! {
-pub struct GetRetweetedByRequestBuilder {
+pub struct GetTweetUsersRequestBuilder {
     media_fields,
     user_fields,
     poll_fields,
@@ -99,7 +99,7 @@ pub struct GetRetweetedByRequestBuilder {
 }
 
 get_req_builder! {
-pub struct GetQuoteTweetsRequestBuilder {
+pub struct GetRelatedTweetsRequestBuilder {
     media_fields,
     user_fields,
     poll_fields,
@@ -194,8 +194,8 @@ where
     pub fn get_tweet_retweeted_by(
         &self,
         id: impl IntoId,
-    ) -> GetRetweetedByRequestBuilder<A, Vec<User>, ResultCountMeta> {
-        GetRetweetedByRequestBuilder::new(
+    ) -> GetTweetUsersRequestBuilder<A, Vec<User>, ResultCountMeta> {
+        GetTweetUsersRequestBuilder::new(
             self,
             self.url(format!("tweets/{id}/retweeted_by")).unwrap(),
         )
@@ -225,10 +225,50 @@ where
     pub fn get_tweet_quote_tweets(
         &self,
         id: impl IntoId,
-    ) -> GetQuoteTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
-        GetQuoteTweetsRequestBuilder::new(
+    ) -> GetRelatedTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
+        GetRelatedTweetsRequestBuilder::new(
             self,
             self.url(format!("tweets/{id}/quote_tweets")).unwrap(),
         )
+    }
+    pub fn get_tweet_liking_users(
+        &self,
+        id: impl IntoId,
+    ) -> GetTweetUsersRequestBuilder<A, Vec<User>, ResultCountMeta> {
+        GetTweetUsersRequestBuilder::new(
+            self,
+            self.url(format!("tweets/{id}/liking_users")).unwrap(),
+        )
+    }
+    pub fn get_user_liked_tweets(
+        &self,
+        id: impl IntoId,
+    ) -> GetRelatedTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
+        GetRelatedTweetsRequestBuilder::new(
+            self,
+            self.url(format!("users/{id}/liked_tweets")).unwrap(),
+        )
+    }
+    pub async fn post_user_tweet_like(
+        &self,
+        user_id: impl IntoId,
+        tweet_id: impl IntoId,
+    ) -> ApiResult<A, Liked, ()> {
+        self.send(
+            self.request(Method::POST, self.url(format!("users/{user_id}/likes"))?)
+                .json(&TweetId::from(tweet_id)),
+        )
+        .await
+    }
+    pub async fn delete_user_tweet_like(
+        &self,
+        user_id: impl IntoId,
+        tweet_id: impl IntoId,
+    ) -> ApiResult<A, Liked, ()> {
+        self.send(self.request(
+            Method::DELETE,
+            self.url(format!("users/{user_id}/likes/{tweet_id}"))?,
+        ))
+        .await
     }
 }

@@ -215,6 +215,35 @@ async fn get_tweet_quote_tweets() -> Result<()> {
 }
 
 #[tokio::test]
+async fn get_tweet_liking_users() -> Result<()> {
+    let _ = get_api_app_ctx()
+        .get_tweet_liking_users(1354143047324299264)
+        .send()
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn get_user_liked_tweets() -> Result<()> {
+    let _ = get_api_app_ctx()
+        .get_user_liked_tweets(2244994945)
+        .send()
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn manage_likes() -> Result<()> {
+    let api = get_api_user_ctx().await;
+    let me = api.get_users_me().send().await?.into_data().unwrap();
+    let _ = api.post_user_tweet_like(me.id, 1354143047324299264).await?;
+    let _ = api
+        .delete_user_tweet_like(me.id, 1354143047324299264)
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
 async fn get_users_by() -> Result<()> {
     let res = get_api_user_ctx()
         .await

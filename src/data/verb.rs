@@ -17,3 +17,4 @@ macro_rules! verb {
 
 verb! { pub struct Deleted { deleted } }
 verb! { pub struct Retweeted { retweeted } }
+verb! { pub struct Liked { liked } }
