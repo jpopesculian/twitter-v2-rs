@@ -51,11 +51,10 @@ pub use api::TwitterApi;
 pub use api_result::{ApiError, ApiPayload, ApiResponse, ApiResult};
 pub use data::{Tweet, User};
 pub use error::{Error, Result};
-pub use id::{Id, IntoId};
 
 pub mod prelude {
     pub use crate::api_result::PaginableApiResponse;
     pub use crate::authorization::Authorization;
+    pub use crate::id::IntoId;
     pub use crate::meta::PaginationMeta;
-    pub use crate::IntoId;
 }

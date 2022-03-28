@@ -1,6 +1,6 @@
 macro_rules! get_req_builder_arg {
     (ids) => {
-        pub fn ids(&mut self, ids: impl IntoIterator<Item = impl $crate::IntoId>) -> &mut Self {
+        pub fn ids(&mut self, ids: impl IntoIterator<Item = impl $crate::id::IntoId>) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("ids", ids);
             self
@@ -102,14 +102,14 @@ macro_rules! get_req_builder_arg {
         }
     };
     (since_id) => {
-        pub fn since_id(&mut self, since_id: impl $crate::IntoId) -> &mut Self {
+        pub fn since_id(&mut self, since_id: impl $crate::id::IntoId) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_val("since_id", since_id);
             self
         }
     };
     (until_id) => {
-        pub fn until_id(&mut self, until_id: impl $crate::IntoId) -> &mut Self {
+        pub fn until_id(&mut self, until_id: impl $crate::id::IntoId) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_val("until_id", until_id);
             self

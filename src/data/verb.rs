@@ -8,8 +8,14 @@ macro_rules! verb {
         }
 
         impl From<$class> for bool {
-            fn from(verb: $class) -> bool {
-                verb.$verb
+            fn from($verb: $class) -> bool {
+                $verb.$verb
+            }
+        }
+
+        impl From<bool> for $class {
+            fn from($verb: bool) -> $class {
+                $class { $verb }
             }
         }
     };
@@ -18,3 +24,5 @@ macro_rules! verb {
 verb! { pub struct Deleted { deleted } }
 verb! { pub struct Retweeted { retweeted } }
 verb! { pub struct Liked { liked } }
+verb! { pub struct Bookmarked { bookmarked } }
+verb! { pub struct Hidden { hidden } }

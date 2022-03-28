@@ -69,6 +69,12 @@ pub enum Scope {
     #[strum(serialize = "block.write")]
     #[serde(rename = "block.write")]
     BlockWrite,
+    #[strum(serialize = "bookmark.read")]
+    #[serde(rename = "bookmark.read")]
+    BookmarkRead,
+    #[strum(serialize = "bookmark.write")]
+    #[serde(rename = "bookmark.write")]
+    BookmarkWrite,
 }
 
 impl From<Scope> for oauth2::Scope {

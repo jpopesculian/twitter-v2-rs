@@ -235,10 +235,33 @@ async fn get_user_liked_tweets() -> Result<()> {
 async fn manage_likes() -> Result<()> {
     let api = get_api_user_ctx().await;
     let me = api.get_users_me().send().await?.into_data().unwrap();
-    let _ = api.post_user_tweet_like(me.id, 1354143047324299264).await?;
-    let _ = api
-        .delete_user_tweet_like(me.id, 1354143047324299264)
-        .await?;
+    let _ = api.post_user_like(me.id, 1354143047324299264).await?;
+    assert!(api
+        .get_user_liked_tweets(me.id)
+        .send()
+        .await?
+        .into_data()
+        .unwrap()
+        .into_iter()
+        .any(|tweet| tweet.id == 1354143047324299264));
+    let _ = api.delete_user_like(me.id, 1354143047324299264).await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn manage_bookmarks() -> Result<()> {
+    let api = get_api_user_ctx().await;
+    let me = api.get_users_me().send().await?.into_data().unwrap();
+    let _ = api.post_user_bookmark(me.id, 1354143047324299264).await?;
+    assert!(api
+        .get_user_bookmarks(me.id)
+        .send()
+        .await?
+        .into_data()
+        .unwrap()
+        .into_iter()
+        .any(|tweet| tweet.id == 1354143047324299264));
+    let _ = api.delete_user_bookmark(me.id, 1354143047324299264).await?;
     Ok(())
 }
 

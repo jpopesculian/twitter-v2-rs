@@ -4,7 +4,7 @@ use std::fmt;
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Id(u64);
 
 impl Id {
@@ -19,6 +19,18 @@ impl Id {
 impl From<Id> for u64 {
     fn from(id: Id) -> Self {
         id.0
+    }
+}
+
+impl From<u64> for Id {
+    fn from(id: u64) -> Self {
+        Id(id)
+    }
+}
+
+impl<'a> From<&'a u64> for Id {
+    fn from(id: &'a u64) -> Self {
+        Id(*id)
     }
 }
 

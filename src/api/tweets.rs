@@ -1,7 +1,9 @@
 use super::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
-use crate::data::{Deleted, Liked, Retweeted, StreamRule, Tweet, TweetsCount, User};
+use crate::data::{
+    Bookmarked, Deleted, Hidden, Liked, Retweeted, StreamRule, Tweet, TweetsCount, User,
+};
 use crate::id::IntoId;
 use crate::meta::{ResultCountMeta, SentMeta, TweetsCountsMeta, TweetsMeta};
 use crate::query::{
@@ -150,7 +152,7 @@ where
             self.url(format!("users/{id}/liked_tweets")).unwrap(),
         )
     }
-    pub async fn post_user_tweet_like(
+    pub async fn post_user_like(
         &self,
         user_id: impl IntoId,
         tweet_id: impl IntoId,
@@ -161,7 +163,7 @@ where
         )
         .await
     }
-    pub async fn delete_user_tweet_like(
+    pub async fn delete_user_like(
         &self,
         user_id: impl IntoId,
         tweet_id: impl IntoId,
@@ -170,6 +172,51 @@ where
             Method::DELETE,
             self.url(format!("users/{user_id}/likes/{tweet_id}"))?,
         ))
+        .await
+    }
+    pub fn get_user_bookmarks(
+        &self,
+        id: impl IntoId,
+    ) -> GetRelatedTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
+        GetRelatedTweetsRequestBuilder::new(
+            self,
+            self.url(format!("users/{id}/bookmarks")).unwrap(),
+        )
+    }
+    pub async fn post_user_bookmark(
+        &self,
+        user_id: impl IntoId,
+        tweet_id: impl IntoId,
+    ) -> ApiResult<A, Bookmarked, ()> {
+        self.send(
+            self.request(
+                Method::POST,
+                self.url(format!("users/{user_id}/bookmarks"))?,
+            )
+            .json(&TweetId::from(tweet_id)),
+        )
+        .await
+    }
+    pub async fn delete_user_bookmark(
+        &self,
+        user_id: impl IntoId,
+        tweet_id: impl IntoId,
+    ) -> ApiResult<A, Bookmarked, ()> {
+        self.send(self.request(
+            Method::DELETE,
+            self.url(format!("users/{user_id}/bookmarks/{tweet_id}"))?,
+        ))
+        .await
+    }
+    pub async fn put_tweet_hidden(
+        &self,
+        id: impl IntoId,
+        hidden: bool,
+    ) -> ApiResult<A, Hidden, ()> {
+        self.send(
+            self.request(Method::PUT, self.url(format!("tweets/{id}/hidden"))?)
+                .json(&Hidden::from(hidden)),
+        )
         .await
     }
 }
