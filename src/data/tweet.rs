@@ -1,5 +1,6 @@
 use super::entity::Entities;
 use super::withheld::Withheld;
+use super::GeoCoordinates;
 use crate::id::{NumericId, StringId};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
@@ -60,22 +61,9 @@ pub struct ContextAnnotation {
     pub entity: ContextAnnotationDescription,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub enum GeoCoordinatesKind {
-    Point,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub struct GeoCoordinates {
-    #[serde(rename = "type")]
-    pub kind: GeoCoordinatesKind,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub coordinates: Option<(usize, usize)>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
-pub struct Geo {
-    pub place_id: NumericId,
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct TweetGeo {
+    pub place_id: Option<StringId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub coordinates: Option<GeoCoordinates>,
 }
@@ -130,7 +118,7 @@ pub struct Tweet {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub entities: Option<Entities>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub geo: Option<Geo>,
+    pub geo: Option<TweetGeo>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub in_reply_to_user_id: Option<NumericId>,
     #[serde(skip_serializing_if = "Option::is_none")]

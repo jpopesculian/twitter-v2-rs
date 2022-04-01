@@ -49,7 +49,7 @@ mod utils;
 
 pub use api::TwitterApi;
 pub use api_result::{ApiError, ApiPayload, ApiResponse, ApiResult};
-pub use data::{Space, Tweet, User};
+pub use data::{Media, Place, Poll, Space, Tweet, User};
 pub use error::{Error, Result};
 
 pub mod prelude {

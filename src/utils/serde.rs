@@ -77,3 +77,23 @@ pub mod option_duration_ms {
         Ok(Option::<i64>::deserialize(deserializer)?.map(Duration::milliseconds))
     }
 }
+
+pub mod option_duration_mins {
+    use super::*;
+    use time::Duration;
+
+    // serialize Duration as ms
+    pub fn serialize<S: Serializer>(
+        duration: &Option<Duration>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error> {
+        duration.map(Duration::whole_minutes).serialize(serializer)
+    }
+
+    // deserialize Duration from ms
+    pub fn deserialize<'a, D: Deserializer<'a>>(
+        deserializer: D,
+    ) -> Result<Option<Duration>, D::Error> {
+        Ok(Option::<i64>::deserialize(deserializer)?.map(Duration::minutes))
+    }
+}
