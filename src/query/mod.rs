@@ -5,6 +5,7 @@ mod fields;
 mod granularity;
 mod macros;
 mod sort_order;
+mod space_state;
 mod to_query;
 
 pub use builder::*;
@@ -14,4 +15,5 @@ pub use fields::*;
 pub use granularity::*;
 pub(crate) use macros::*;
 pub use sort_order::*;
+pub use space_state::*;
 pub(crate) use to_query::*;

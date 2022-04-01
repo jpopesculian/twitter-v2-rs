@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 macro_rules! verb {
     ($vis:vis struct $class:ident { $verb:ident }) => {
-        #[derive(Deserialize, Serialize, Clone, Copy, Debug)]
+        #[derive(Deserialize, Serialize, Clone, Copy, Debug, Eq, PartialEq)]
         $vis struct $class {
             pub $verb: bool
         }

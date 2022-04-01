@@ -1,11 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
+use twitter_v2::data::{Expansions, Space};
 use twitter_v2::Tweet;
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Example<T> {
     data: T,
+    includes: Option<Expansions>,
 }
 
 fn get_examples(path: impl AsRef<Path>) -> impl Iterator<Item = (PathBuf, File)> {
@@ -24,6 +26,14 @@ fn get_examples(path: impl AsRef<Path>) -> impl Iterator<Item = (PathBuf, File)>
 fn tweet_serde() {
     for (path, example) in get_examples("./fixtures/data/tweet") {
         let _ = serde_json::from_reader::<_, Example<Vec<Tweet>>>(example)
+            .unwrap_or_else(|e| panic!("Could not read example '{}': {}", path.display(), e));
+    }
+}
+
+#[test]
+fn space_serde() {
+    for (path, example) in get_examples("./fixtures/data/space") {
+        let _ = serde_json::from_reader::<_, Example<Vec<Space>>>(example)
             .unwrap_or_else(|e| panic!("Could not read example '{}': {}", path.display(), e));
     }
 }

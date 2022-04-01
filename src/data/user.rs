@@ -1,14 +1,21 @@
 use super::entity::Entities;
-use super::metric::PublicMetrics;
 use super::withheld::Withheld;
-use crate::id::Id;
+use crate::id::NumericId;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use url::Url;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct UserPublicMetrics {
+    followers_count: usize,
+    following_count: usize,
+    tweet_count: usize,
+    listed_count: usize,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct User {
-    pub id: Id,
+    pub id: NumericId,
     pub name: String,
     pub username: String,
     #[serde(
@@ -24,15 +31,15 @@ pub struct User {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub pinned_tweet_id: Option<Id>,
+    pub pinned_tweet_id: Option<NumericId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profile_image_url: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub protected: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub public_metrics: Option<PublicMetrics>,
+    pub public_metrics: Option<UserPublicMetrics>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub url: Option<Url>,
+    pub url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub verified: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]

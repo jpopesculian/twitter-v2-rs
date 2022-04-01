@@ -18,7 +18,7 @@ pub struct ApiPayload<T, M> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub meta: Option<M>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub includes: Option<Vec<Expansions>>,
+    pub includes: Option<Expansions>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub errors: Option<Vec<ApiError>>,
 }
@@ -30,8 +30,8 @@ impl<T, M> ApiPayload<T, M> {
     pub fn meta(&self) -> Option<&M> {
         self.meta.as_ref()
     }
-    pub fn includes(&self) -> Option<&[Expansions]> {
-        self.includes.as_deref()
+    pub fn includes(&self) -> Option<&Expansions> {
+        self.includes.as_ref()
     }
     pub fn errors(&self) -> Option<&[ApiError]> {
         self.errors.as_deref()
@@ -42,7 +42,7 @@ impl<T, M> ApiPayload<T, M> {
     pub fn into_meta(self) -> Option<M> {
         self.meta
     }
-    pub fn into_includes(self) -> Option<Vec<Expansions>> {
+    pub fn into_includes(self) -> Option<Expansions> {
         self.includes
     }
     pub fn into_errors(self) -> Option<Vec<ApiError>> {
@@ -107,7 +107,7 @@ impl<A, T, M> ApiResponse<A, T, M> {
     pub fn into_meta(self) -> Option<M> {
         self.payload.meta
     }
-    pub fn into_includes(self) -> Option<Vec<Expansions>> {
+    pub fn into_includes(self) -> Option<Expansions> {
         self.payload.includes
     }
     pub fn into_errors(self) -> Option<Vec<ApiError>> {

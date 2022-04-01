@@ -24,3 +24,12 @@ pub enum TweetExpansion {
 pub enum UserExpansion {
     PinnedTweetId,
 }
+
+#[derive(Copy, Clone, Debug, Display)]
+#[strum(serialize_all = "snake_case")]
+pub enum SpaceExpansion {
+    InvitedUserIds,
+    SpeakerIds,
+    CreatorId,
+    HostIds,
+}

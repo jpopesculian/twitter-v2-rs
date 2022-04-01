@@ -55,6 +55,6 @@ pub use error::{Error, Result};
 pub mod prelude {
     pub use crate::api_result::PaginableApiResponse;
     pub use crate::authorization::Authorization;
-    pub use crate::id::IntoId;
+    pub use crate::id::IntoNumericId;
     pub use crate::meta::PaginationMeta;
 }

@@ -2,7 +2,7 @@ use crate::api::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::StreamRule;
-use crate::id::{Id, IntoId};
+use crate::id::{IntoNumericId, NumericId};
 use crate::meta::StreamRuleMeta;
 use crate::query::UrlQueryExt;
 use reqwest::Method;
@@ -16,7 +16,7 @@ struct DraftStreamRuleAdd {
 }
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
 struct DraftStreamRuleDelete {
-    ids: Vec<Id>,
+    ids: Vec<NumericId>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -74,11 +74,11 @@ where
         }
         self
     }
-    pub fn delete_id(&mut self, id: impl IntoId) -> &mut Self {
+    pub fn delete_id(&mut self, id: impl IntoNumericId) -> &mut Self {
         self.delete_ids([id]);
         self
     }
-    pub fn delete_ids(&mut self, ids: impl IntoIterator<Item = impl IntoId>) -> &mut Self {
+    pub fn delete_ids(&mut self, ids: impl IntoIterator<Item = impl IntoNumericId>) -> &mut Self {
         if let Some(delete) = self.stream_rule.delete.as_mut() {
             for id in ids {
                 delete.ids.push(id.into_id())

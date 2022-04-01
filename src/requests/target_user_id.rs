@@ -1,14 +1,14 @@
-use crate::id::{Id, IntoId};
+use crate::id::{IntoNumericId, NumericId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 pub struct TargetUserId {
-    target_user_id: Id,
+    target_user_id: NumericId,
 }
 
 impl<T> From<T> for TargetUserId
 where
-    T: IntoId,
+    T: IntoNumericId,
 {
     fn from(id: T) -> Self {
         Self {

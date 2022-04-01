@@ -1,45 +1,10 @@
+mod common;
+
+use common::{get_api_app_ctx, get_api_user_ctx};
 use futures::prelude::*;
 use rand::distributions::{Alphanumeric, DistString};
-use std::ops::Deref;
-use std::sync::Mutex;
-use twitter_v2::authorization::{BearerToken, Oauth2Client, Oauth2Token};
 use twitter_v2::prelude::*;
-use twitter_v2::{Result, TwitterApi};
-
-lazy_static::lazy_static! {
-    static ref OAUTH2_TOKEN: Mutex<Oauth2Token> = Mutex::new(serde_json::from_reader(
-        std::fs::File::open("./.oauth2_token.json").expect(".oauth2_token.json not found"),
-    )
-    .expect(".oauth2_token.json not valid json"));
-}
-async fn get_token() -> Oauth2Token {
-    let oauth2_client = Oauth2Client::new(
-        std::env::var("CLIENT_ID").expect("could not find CLIENT_ID"),
-        std::env::var("CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
-        "http://localhost:3000/callback".parse().unwrap(),
-    );
-    let mut token = OAUTH2_TOKEN.lock().unwrap();
-    if oauth2_client
-        .refresh_token_if_expired(&mut token)
-        .await
-        .unwrap()
-    {
-        serde_json::to_writer(
-            std::fs::File::create("./.oauth2_token.json").expect(".oauth2_token.json not found"),
-            token.deref(),
-        )
-        .expect("couldn't save token");
-    }
-    token.clone()
-}
-async fn get_api_user_ctx() -> TwitterApi<Oauth2Token> {
-    TwitterApi::new(get_token().await)
-}
-fn get_api_app_ctx() -> TwitterApi<BearerToken> {
-    TwitterApi::new(BearerToken::new(
-        std::env::var("APP_BEARER_TOKEN").expect("BEARER_TOKEN not found"),
-    ))
-}
+use twitter_v2::Result;
 
 fn rand_str(len: usize) -> String {
     Alphanumeric.sample_string(&mut rand::thread_rng(), len)
@@ -262,78 +227,5 @@ async fn manage_bookmarks() -> Result<()> {
         .into_iter()
         .any(|tweet| tweet.id == 1354143047324299264));
     let _ = api.delete_user_bookmark(me.id, 1354143047324299264).await?;
-    Ok(())
-}
-
-#[tokio::test]
-async fn get_users_by() -> Result<()> {
-    let res = get_api_user_ctx()
-        .await
-        .get_users_by_usernames(&["TwitterDev", "Twitter"])
-        .send()
-        .await?;
-    assert_eq!(res.data().unwrap().len(), 2);
-    Ok(())
-}
-
-#[tokio::test]
-async fn get_user_by_username() -> Result<()> {
-    let _ = get_api_user_ctx()
-        .await
-        .get_user_by_username("TwitterDev")
-        .send()
-        .await?;
-    Ok(())
-}
-
-#[tokio::test]
-async fn get_users_me() -> Result<()> {
-    let _ = get_api_user_ctx().await.get_users_me().send().await?;
-    Ok(())
-}
-
-#[tokio::test]
-async fn manage_user_following() -> Result<()> {
-    let twitter_dev_id = 2244994945;
-    let api = get_api_user_ctx().await;
-    let me = api.get_users_me().send().await?.into_data().unwrap();
-    assert!(!api
-        .get_user_following(me.id)
-        .send()
-        .await?
-        .into_data()
-        .unwrap()
-        .into_iter()
-        .any(|user| user.id == twitter_dev_id),);
-    assert!(
-        api.post_user_following(me.id, twitter_dev_id)
-            .await?
-            .into_data()
-            .unwrap()
-            .following
-    );
-    assert!(api
-        .get_user_following(me.id)
-        .send()
-        .await?
-        .into_data()
-        .unwrap()
-        .into_iter()
-        .any(|user| user.id == twitter_dev_id),);
-    assert!(
-        !api.delete_user_following(me.id, twitter_dev_id)
-            .await?
-            .into_data()
-            .unwrap()
-            .following
-    );
-    assert!(!api
-        .get_user_following(me.id)
-        .send()
-        .await?
-        .into_data()
-        .unwrap()
-        .into_iter()
-        .any(|user| user.id == twitter_dev_id),);
     Ok(())
 }

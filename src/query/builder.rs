@@ -120,3 +120,22 @@ pub struct GetRelatedUsersRequestBuilder {
     pagination_token
 }
 }
+
+get_req_builder! {
+pub struct GetSpacesRequestBuilder {
+    space_expansions,
+    space_fields,
+    topic_fields,
+    user_fields
+}
+}
+
+get_req_builder! {
+pub struct GetSpacesSearchRequestBuilder {
+    space_expansions,
+    space_fields,
+    topic_fields,
+    user_fields,
+    space_state
+}
+}

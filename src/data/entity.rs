@@ -1,15 +1,15 @@
-use crate::id::Id;
+use crate::id::NumericId;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct UrlImage {
     pub url: Url,
     pub width: usize,
     pub height: usize,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct UrlEntity {
     pub start: usize,
     pub end: usize,
@@ -28,14 +28,14 @@ pub struct UrlEntity {
     pub unwound_url: Option<String>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct HashtagEntity {
     pub start: usize,
     pub end: usize,
     pub tag: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct AnnotationEntity {
     pub start: usize,
     pub end: usize,
@@ -45,23 +45,23 @@ pub struct AnnotationEntity {
     pub normalized_text: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct CashtagEntity {
     pub start: usize,
     pub end: usize,
     pub tag: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct MentionEntity {
     pub start: usize,
     pub end: usize,
     pub username: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub id: Option<Id>,
+    pub id: Option<NumericId>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Entities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub urls: Option<Vec<UrlEntity>>,

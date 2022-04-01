@@ -83,3 +83,33 @@ pub enum UserField {
     Verified,
     Withheld,
 }
+
+#[derive(Copy, Clone, Debug, Display)]
+#[strum(serialize_all = "snake_case")]
+pub enum SpaceField {
+    HostIds,
+    CreatedAt,
+    CreatorId,
+    Id,
+    Lang,
+    InvitedUserIds,
+    ParticipantCount,
+    SpeakerIds,
+    StartedAt,
+    EndedAt,
+    SubscriberCount,
+    TopicIds,
+    State,
+    Title,
+    UpdatedAt,
+    ScheduledStart,
+    IsTicketed,
+}
+
+#[derive(Copy, Clone, Debug, Display)]
+#[strum(serialize_all = "snake_case")]
+pub enum TopicField {
+    Id,
+    Name,
+    Description,
+}

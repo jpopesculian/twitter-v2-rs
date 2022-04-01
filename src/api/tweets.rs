@@ -4,7 +4,7 @@ use crate::authorization::Authorization;
 use crate::data::{
     Bookmarked, Deleted, Hidden, Liked, Retweeted, StreamRule, Tweet, TweetsCount, User,
 };
-use crate::id::IntoId;
+use crate::id::IntoNumericId;
 use crate::meta::{ResultCountMeta, SentMeta, TweetsCountsMeta, TweetsMeta};
 use crate::query::{
     GetRelatedTweetsRequestBuilder, GetStreamRulesRequestBuilder, GetTimelineRequestBuilder,
@@ -20,31 +20,31 @@ where
 {
     pub fn get_tweets(
         &self,
-        ids: impl IntoIterator<Item = impl IntoId>,
+        ids: impl IntoIterator<Item = impl IntoNumericId>,
     ) -> GetTweetsRequestBuilder<A, Vec<Tweet>, ()> {
         let mut url = self.url("tweets").unwrap();
         url.append_query_seq("ids", ids);
         GetTweetsRequestBuilder::new(self, url)
     }
-    pub fn get_tweet(&self, id: impl IntoId) -> GetTweetsRequestBuilder<A, Tweet, ()> {
+    pub fn get_tweet(&self, id: impl IntoNumericId) -> GetTweetsRequestBuilder<A, Tweet, ()> {
         GetTweetsRequestBuilder::new(self, self.url(format!("tweets/{id}")).unwrap())
     }
     pub fn post_tweet(&self) -> TweetBuilder<A> {
         TweetBuilder::new(self, self.url("tweets").unwrap())
     }
-    pub async fn delete_tweet(&self, id: impl IntoId) -> ApiResult<A, Deleted, ()> {
+    pub async fn delete_tweet(&self, id: impl IntoNumericId) -> ApiResult<A, Deleted, ()> {
         self.send(self.request(Method::DELETE, self.url(format!("tweets/{id}"))?))
             .await
     }
     pub fn get_user_tweets(
         &self,
-        user_id: impl IntoId,
+        user_id: impl IntoNumericId,
     ) -> GetTimelineRequestBuilder<A, Vec<Tweet>, TweetsMeta> {
         GetTimelineRequestBuilder::new(self, self.url(format!("users/{user_id}/tweets")).unwrap())
     }
     pub fn get_user_mentions(
         &self,
-        user_id: impl IntoId,
+        user_id: impl IntoNumericId,
     ) -> GetTimelineRequestBuilder<A, Vec<Tweet>, TweetsMeta> {
         GetTimelineRequestBuilder::new(self, self.url(format!("users/{user_id}/mentions")).unwrap())
     }
@@ -96,7 +96,7 @@ where
     }
     pub fn get_tweet_retweeted_by(
         &self,
-        id: impl IntoId,
+        id: impl IntoNumericId,
     ) -> GetTweetUsersRequestBuilder<A, Vec<User>, ResultCountMeta> {
         GetTweetUsersRequestBuilder::new(
             self,
@@ -105,8 +105,8 @@ where
     }
     pub async fn post_user_retweet(
         &self,
-        user_id: impl IntoId,
-        tweet_id: impl IntoId,
+        user_id: impl IntoNumericId,
+        tweet_id: impl IntoNumericId,
     ) -> ApiResult<A, Retweeted, ()> {
         self.send(
             self.request(Method::POST, self.url(format!("users/{user_id}/retweets"))?)
@@ -116,8 +116,8 @@ where
     }
     pub async fn delete_user_retweet(
         &self,
-        user_id: impl IntoId,
-        tweet_id: impl IntoId,
+        user_id: impl IntoNumericId,
+        tweet_id: impl IntoNumericId,
     ) -> ApiResult<A, Retweeted, ()> {
         self.send(self.request(
             Method::DELETE,
@@ -127,7 +127,7 @@ where
     }
     pub fn get_tweet_quote_tweets(
         &self,
-        id: impl IntoId,
+        id: impl IntoNumericId,
     ) -> GetRelatedTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
         GetRelatedTweetsRequestBuilder::new(
             self,
@@ -136,7 +136,7 @@ where
     }
     pub fn get_tweet_liking_users(
         &self,
-        id: impl IntoId,
+        id: impl IntoNumericId,
     ) -> GetTweetUsersRequestBuilder<A, Vec<User>, ResultCountMeta> {
         GetTweetUsersRequestBuilder::new(
             self,
@@ -145,7 +145,7 @@ where
     }
     pub fn get_user_liked_tweets(
         &self,
-        id: impl IntoId,
+        id: impl IntoNumericId,
     ) -> GetRelatedTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
         GetRelatedTweetsRequestBuilder::new(
             self,
@@ -154,8 +154,8 @@ where
     }
     pub async fn post_user_like(
         &self,
-        user_id: impl IntoId,
-        tweet_id: impl IntoId,
+        user_id: impl IntoNumericId,
+        tweet_id: impl IntoNumericId,
     ) -> ApiResult<A, Liked, ()> {
         self.send(
             self.request(Method::POST, self.url(format!("users/{user_id}/likes"))?)
@@ -165,8 +165,8 @@ where
     }
     pub async fn delete_user_like(
         &self,
-        user_id: impl IntoId,
-        tweet_id: impl IntoId,
+        user_id: impl IntoNumericId,
+        tweet_id: impl IntoNumericId,
     ) -> ApiResult<A, Liked, ()> {
         self.send(self.request(
             Method::DELETE,
@@ -176,7 +176,7 @@ where
     }
     pub fn get_user_bookmarks(
         &self,
-        id: impl IntoId,
+        id: impl IntoNumericId,
     ) -> GetRelatedTweetsRequestBuilder<A, Vec<Tweet>, ResultCountMeta> {
         GetRelatedTweetsRequestBuilder::new(
             self,
@@ -185,8 +185,8 @@ where
     }
     pub async fn post_user_bookmark(
         &self,
-        user_id: impl IntoId,
-        tweet_id: impl IntoId,
+        user_id: impl IntoNumericId,
+        tweet_id: impl IntoNumericId,
     ) -> ApiResult<A, Bookmarked, ()> {
         self.send(
             self.request(
@@ -199,8 +199,8 @@ where
     }
     pub async fn delete_user_bookmark(
         &self,
-        user_id: impl IntoId,
-        tweet_id: impl IntoId,
+        user_id: impl IntoNumericId,
+        tweet_id: impl IntoNumericId,
     ) -> ApiResult<A, Bookmarked, ()> {
         self.send(self.request(
             Method::DELETE,
@@ -210,7 +210,7 @@ where
     }
     pub async fn put_tweet_hidden(
         &self,
-        id: impl IntoId,
+        id: impl IntoNumericId,
         hidden: bool,
     ) -> ApiResult<A, Hidden, ()> {
         self.send(

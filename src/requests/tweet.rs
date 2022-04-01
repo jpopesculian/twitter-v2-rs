@@ -2,7 +2,7 @@ use crate::api::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{ReplySettings, Tweet};
-use crate::id::{Id, IntoId};
+use crate::id::{IntoNumericId, NumericId};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
@@ -10,7 +10,7 @@ use url::Url;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct DraftTweetGeo {
-    pub place_id: Id,
+    pub place_id: NumericId,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -85,7 +85,7 @@ where
         self.tweet.for_super_followers_only = Some(for_super_followers_only);
         self
     }
-    pub fn place_id(&mut self, place_id: impl IntoId) -> &mut Self {
+    pub fn place_id(&mut self, place_id: impl IntoNumericId) -> &mut Self {
         if let Some(geo) = self.tweet.geo.as_mut() {
             geo.place_id = place_id.into_id();
         } else {
@@ -97,8 +97,8 @@ where
     }
     pub fn add_media(
         &mut self,
-        media_ids: impl IntoIterator<Item = impl IntoId>,
-        tagged_user_ids: impl IntoIterator<Item = impl IntoId>,
+        media_ids: impl IntoIterator<Item = impl IntoNumericId>,
+        tagged_user_ids: impl IntoIterator<Item = impl IntoNumericId>,
     ) -> &mut Self {
         if let Some(media) = self.tweet.media.as_mut() {
             media
@@ -132,16 +132,16 @@ where
         });
         self
     }
-    pub fn quote_tweet_id(&mut self, id: impl IntoId) -> &mut Self {
+    pub fn quote_tweet_id(&mut self, id: impl IntoNumericId) -> &mut Self {
         self.tweet.quote_tweet_id = Some(id.to_string());
         self
     }
-    pub fn add_exclude_reply_user_id(&mut self, user_id: impl IntoId) -> &mut Self {
+    pub fn add_exclude_reply_user_id(&mut self, user_id: impl IntoNumericId) -> &mut Self {
         self.add_exclude_reply_user_ids([user_id])
     }
     pub fn add_exclude_reply_user_ids(
         &mut self,
-        user_ids: impl IntoIterator<Item = impl IntoId>,
+        user_ids: impl IntoIterator<Item = impl IntoNumericId>,
     ) -> &mut Self {
         let mut user_ids = user_ids
             .into_iter()
@@ -161,7 +161,7 @@ where
         }
         self
     }
-    pub fn in_reply_to_tweet_id(&mut self, user_id: impl IntoId) -> &mut Self {
+    pub fn in_reply_to_tweet_id(&mut self, user_id: impl IntoNumericId) -> &mut Self {
         if let Some(reply) = self.tweet.reply.as_mut() {
             reply.in_reply_to_tweet_id = Some(user_id.to_string());
         } else {

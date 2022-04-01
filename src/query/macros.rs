@@ -1,6 +1,9 @@
 macro_rules! get_req_builder_arg {
     (ids) => {
-        pub fn ids(&mut self, ids: impl IntoIterator<Item = impl $crate::id::IntoId>) -> &mut Self {
+        pub fn ids(
+            &mut self,
+            ids: impl IntoIterator<Item = impl $crate::id::IntoNumericId>,
+        ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("ids", ids);
             self
@@ -56,6 +59,26 @@ macro_rules! get_req_builder_arg {
             self
         }
     };
+    (space_fields) => {
+        pub fn space_fields(
+            &mut self,
+            fields: impl IntoIterator<Item = $crate::query::SpaceField>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("space.fields", fields);
+            self
+        }
+    };
+    (topic_fields) => {
+        pub fn topic_fields(
+            &mut self,
+            fields: impl IntoIterator<Item = $crate::query::TopicField>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("topic.fields", fields);
+            self
+        }
+    };
     (tweet_expansions) => {
         pub fn expansions(
             &mut self,
@@ -70,6 +93,16 @@ macro_rules! get_req_builder_arg {
         pub fn expansions(
             &mut self,
             expansions: impl IntoIterator<Item = $crate::query::UserExpansion>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("expansions", expansions);
+            self
+        }
+    };
+    (space_expansions) => {
+        pub fn expansions(
+            &mut self,
+            expansions: impl IntoIterator<Item = $crate::query::SpaceExpansion>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("expansions", expansions);
@@ -102,14 +135,14 @@ macro_rules! get_req_builder_arg {
         }
     };
     (since_id) => {
-        pub fn since_id(&mut self, since_id: impl $crate::id::IntoId) -> &mut Self {
+        pub fn since_id(&mut self, since_id: impl $crate::id::IntoNumericId) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_val("since_id", since_id);
             self
         }
     };
     (until_id) => {
-        pub fn until_id(&mut self, until_id: impl $crate::id::IntoId) -> &mut Self {
+        pub fn until_id(&mut self, until_id: impl $crate::id::IntoNumericId) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_val("until_id", until_id);
             self
@@ -148,6 +181,13 @@ macro_rules! get_req_builder_arg {
             use $crate::query::UrlQueryExt;
             self.url
                 .append_query_val("backfill_minutes", backfill.as_secs() / 60);
+            self
+        }
+    };
+    (space_state) => {
+        pub fn state(&mut self, state: $crate::query::SpaceStateQuery) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_val("state", state);
             self
         }
     };

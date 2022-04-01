@@ -10,6 +10,11 @@ pub struct ResultCountMeta {
     pub previous_token: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct SimpleResultCountMeta {
+    pub result_count: usize,
+}
+
 impl PaginationMeta for ResultCountMeta {
     fn next_token(&self) -> Option<&str> {
         self.next_token.as_deref()
