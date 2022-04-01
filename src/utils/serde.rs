@@ -1,12 +1,12 @@
-use reqwest::StatusCode;
 use serde::de::Error as DeError;
 use serde::de::Visitor;
-use serde::{Deserializer, Serialize, Serializer};
-use std::convert::TryInto;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 
 pub mod status_code {
     use super::*;
+    use reqwest::StatusCode;
+    use std::convert::TryInto;
 
     // serialize StatusCode as u16
     pub fn serialize<S: Serializer>(
@@ -53,5 +53,27 @@ pub mod status_code {
     // deserialize StatusCode from u16
     pub fn deserialize<'a, D: Deserializer<'a>>(deserializer: D) -> Result<StatusCode, D::Error> {
         deserializer.deserialize_any(StatusCodeVisitor)
+    }
+}
+
+pub mod option_duration_ms {
+    use super::*;
+    use time::Duration;
+
+    // serialize Duration as ms
+    pub fn serialize<S: Serializer>(
+        duration: &Option<Duration>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error> {
+        duration
+            .map(Duration::whole_milliseconds)
+            .serialize(serializer)
+    }
+
+    // deserialize Duration from ms
+    pub fn deserialize<'a, D: Deserializer<'a>>(
+        deserializer: D,
+    ) -> Result<Option<Duration>, D::Error> {
+        Ok(Option::<i64>::deserialize(deserializer)?.map(Duration::milliseconds))
     }
 }

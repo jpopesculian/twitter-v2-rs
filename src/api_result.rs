@@ -92,6 +92,9 @@ impl<A, T, M> ApiResponse<A, T, M> {
             payload,
         }
     }
+    pub fn client(&self) -> &TwitterApi<A> {
+        &self.client
+    }
     pub fn url(&self) -> &Url {
         &self.url
     }

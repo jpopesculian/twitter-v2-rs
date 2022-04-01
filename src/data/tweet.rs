@@ -1,6 +1,6 @@
 use super::entity::Entities;
 use super::withheld::Withheld;
-use crate::id::NumericId;
+use crate::id::{NumericId, StringId};
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 
@@ -41,7 +41,7 @@ pub struct TweetOrganicMetrics {
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct Attachments {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub media_keys: Option<Vec<String>>,
+    pub media_keys: Option<Vec<StringId>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub poll_ids: Option<Vec<NumericId>>,
 }
