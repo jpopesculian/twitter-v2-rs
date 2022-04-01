@@ -110,3 +110,13 @@ pub struct GetUsersRequestBuilder {
     user_expansions
 }
 }
+
+get_req_builder! {
+pub struct GetRelatedUsersRequestBuilder {
+    user_fields,
+    tweet_fields,
+    user_expansions,
+    max_results,
+    pagination_token
+}
+}

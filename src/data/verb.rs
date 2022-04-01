@@ -7,6 +7,12 @@ macro_rules! verb {
             pub $verb: bool
         }
 
+        impl $class {
+            pub fn as_bool(&self) -> bool {
+                self.$verb
+            }
+        }
+
         impl From<$class> for bool {
             fn from($verb: $class) -> bool {
                 $verb.$verb
@@ -26,3 +32,6 @@ verb! { pub struct Retweeted { retweeted } }
 verb! { pub struct Liked { liked } }
 verb! { pub struct Bookmarked { bookmarked } }
 verb! { pub struct Hidden { hidden } }
+verb! { pub struct Following { following } }
+verb! { pub struct Blocking { blocking } }
+verb! { pub struct Muting { muting } }
