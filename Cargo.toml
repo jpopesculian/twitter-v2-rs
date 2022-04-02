@@ -1,6 +1,6 @@
 [package]
 name = "twitter-v2"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -12,7 +12,7 @@ keywords = ["twitter", "v2", "api", "client", "oauth"]
 categories = ["web-programming::http-client"]
 
 [features]
-default = ["oauth2", "rustls-tls"]
+default = ["oauth2", "native-tls"]
 rustls-tls = ["oauth2/rustls-tls", "reqwest/rustls-tls"]
 native-tls = ["oauth2/native-tls", "reqwest/native-tls"]
 arbitrary_precision = ["serde_json/arbitrary_precision"]

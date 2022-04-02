@@ -100,7 +100,7 @@ where
             self.url(format!("users/{id}/followed_lists")).unwrap(),
         )
     }
-    pub async fn post_user_follow_list(
+    pub async fn post_user_followed_list(
         &self,
         id: impl IntoNumericId,
         list_id: impl IntoNumericId,
@@ -114,7 +114,7 @@ where
         )
         .await
     }
-    pub async fn delete_user_follow_list(
+    pub async fn delete_user_followed_list(
         &self,
         id: impl IntoNumericId,
         list_id: impl IntoNumericId,
