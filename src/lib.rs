@@ -1,3 +1,5 @@
+//! [![v2](https://img.shields.io/endpoint?url=https%3A%2F%2Ftwbadges.glitch.me%2Fbadges%2Fv2)](https://developer.twitter.com/en/docs/twitter-api)
+//!
 //! Supports all of the Twitter v2 API endpoints, but many remain fairly untested
 //! due to the complexity of the API and time restraints. PRs and Issues are very welcome!
 //! As this repo currently has limited documentation, please check out the amazing [Twitter API v2
@@ -63,11 +65,13 @@ pub mod query;
 pub mod requests;
 mod utils;
 
-pub use api::{TwitterApi, TwitterApiWithUserCtx};
-pub use api_result::{ApiError, ApiPayload, ApiResponse, ApiResult};
-pub use authorization::Authorization;
-pub use data::{Media, Place, Poll, Space, Tweet, User};
-pub use error::{Error, Result};
+pub use self::{
+    api::{TwitterApi, TwitterApiWithUserCtx},
+    api_result::{ApiError, ApiPayload, ApiResponse, ApiResult},
+    authorization::Authorization,
+    data::{Media, Place, Poll, Space, Tweet, User},
+    error::{Error, Result},
+};
 
 pub mod prelude {
     pub use crate::api_result::PaginableApiResponse;

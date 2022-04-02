@@ -1,5 +1,7 @@
 # twitter-v2
 
+[![v2](https://img.shields.io/endpoint?url=https%3A%2F%2Ftwbadges.glitch.me%2Fbadges%2Fv2)](https://developer.twitter.com/en/docs/twitter-api)
+
 Supports all of the Twitter v2 API endpoints, but many remain fairly untested
 due to the complexity of the API and time restraints. PRs and Issues are very welcome!
 As this repo currently has limited documentation, please check out the amazing [Twitter API v2
