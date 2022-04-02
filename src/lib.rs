@@ -65,12 +65,13 @@ mod utils;
 
 pub use api::{TwitterApi, TwitterApiWithUserCtx};
 pub use api_result::{ApiError, ApiPayload, ApiResponse, ApiResult};
+pub use authorization::Authorization;
 pub use data::{Media, Place, Poll, Space, Tweet, User};
 pub use error::{Error, Result};
 
 pub mod prelude {
     pub use crate::api_result::PaginableApiResponse;
     pub use crate::authorization::Authorization;
-    pub use crate::id::IntoNumericId;
+    pub use crate::id::{IntoNumericId, IntoStringId};
     pub use crate::meta::PaginationMeta;
 }
