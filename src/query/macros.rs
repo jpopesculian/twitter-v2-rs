@@ -221,6 +221,13 @@ macro_rules! get_req_builder_arg {
             self
         }
     };
+    (compliance_job_status) => {
+        pub fn status(&mut self, status: $crate::query::ComplianceJobStatusQuery) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_val("status", status);
+            self
+        }
+    };
 }
 
 macro_rules! get_req_builder_verb {

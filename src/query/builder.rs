@@ -167,3 +167,9 @@ pub struct GetLimitedRelatedTweetsRequestBuilder {
     pagination_token
 }
 }
+
+get_req_builder! {
+pub struct GetComplianceJobsRequestBuilder {
+    compliance_job_status
+}
+}

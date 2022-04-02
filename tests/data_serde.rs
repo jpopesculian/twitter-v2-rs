@@ -2,7 +2,7 @@ use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
-use twitter_v2::data::{Expansions, Space};
+use twitter_v2::data::{ComplianceJob, Expansions, Space};
 use twitter_v2::Tweet;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

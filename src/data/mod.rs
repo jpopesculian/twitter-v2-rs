@@ -1,3 +1,4 @@
+mod compliance_job;
 mod entity;
 mod expansions;
 mod geo;
@@ -13,6 +14,7 @@ mod user;
 mod verb;
 mod withheld;
 
+pub use compliance_job::*;
 pub use entity::*;
 pub use expansions::*;
 pub use geo::*;

@@ -1,4 +1,5 @@
 mod builder;
+mod compliance_job;
 mod exclude;
 mod expansions;
 mod fields;
@@ -9,6 +10,7 @@ mod space_state;
 mod to_query;
 
 pub use builder::*;
+pub use compliance_job::*;
 pub use exclude::*;
 pub use expansions::*;
 pub use fields::*;
