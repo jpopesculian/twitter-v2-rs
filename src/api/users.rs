@@ -6,7 +6,7 @@ use crate::id::IntoNumericId;
 use crate::meta::ResultCountMeta;
 use crate::query::{GetRelatedUsersRequestBuilder, GetUsersRequestBuilder, UrlQueryExt};
 use crate::requests::TargetUserId;
-use crate::utils::percent_encode;
+use crate::utils::url;
 use reqwest::Method;
 
 impl<A> TwitterApi<A>
@@ -38,11 +38,7 @@ where
     ) -> GetUsersRequestBuilder<A, User, ()> {
         GetUsersRequestBuilder::new(
             self,
-            self.url(format!(
-                "users/by/username/{}",
-                percent_encode(&username.to_string())
-            ))
-            .unwrap(),
+            self.url(url!("users/by/username/{}", username)).unwrap(),
         )
     }
     pub fn get_users_me(&self) -> GetUsersRequestBuilder<A, User, ()> {

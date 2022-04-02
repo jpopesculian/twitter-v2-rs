@@ -28,6 +28,7 @@ macro_rules! verb {
 }
 
 verb! { pub struct Deleted { deleted } }
+verb! { pub struct Updated { updated } }
 verb! { pub struct Retweeted { retweeted } }
 verb! { pub struct Liked { liked } }
 verb! { pub struct Bookmarked { bookmarked } }
@@ -35,3 +36,4 @@ verb! { pub struct Hidden { hidden } }
 verb! { pub struct Following { following } }
 verb! { pub struct Blocking { blocking } }
 verb! { pub struct Muting { muting } }
+verb! { pub struct IsMember { is_member } }

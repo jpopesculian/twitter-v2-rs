@@ -139,3 +139,31 @@ pub struct GetSpacesSearchRequestBuilder {
     space_state
 }
 }
+
+get_req_builder! {
+pub struct GetListsRequestBuilder {
+    list_expansions,
+    list_fields,
+    user_fields
+}
+}
+
+get_req_builder! {
+pub struct GetPaginatedListsRequestBuilder {
+    list_expansions,
+    list_fields,
+    user_fields,
+    max_results,
+    pagination_token
+}
+}
+
+get_req_builder! {
+pub struct GetLimitedRelatedTweetsRequestBuilder {
+    user_fields,
+    tweet_fields,
+    limited_tweet_expansions,
+    max_results,
+    pagination_token
+}
+}

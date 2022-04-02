@@ -35,7 +35,7 @@ impl<A> StreamRuleBuilder<A>
 where
     A: Authorization,
 {
-    pub fn new(client: &TwitterApi<A>, url: Url) -> Self {
+    pub(crate) fn new(client: &TwitterApi<A>, url: Url) -> Self {
         Self {
             client: client.clone(),
             url,

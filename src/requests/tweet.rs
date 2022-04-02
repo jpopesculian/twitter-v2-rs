@@ -2,30 +2,30 @@ use crate::api::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
 use crate::data::{ReplySettings, Tweet};
-use crate::id::{IntoNumericId, NumericId};
+use crate::id::{IntoNumericId, IntoStringId, StringId};
 use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use url::Url;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 struct DraftTweetGeo {
-    pub place_id: NumericId,
+    pub place_id: StringId,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 struct DraftTweetMedia {
     pub media_ids: Vec<String>,
     pub tagged_user_ids: Vec<String>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 struct DraftTweetPoll {
     pub options: Vec<String>,
     pub duration_minutes: u64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 struct DraftTweetReply {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub exclude_reply_user_ids: Option<Vec<String>>,
@@ -33,7 +33,7 @@ struct DraftTweetReply {
     pub in_reply_to_tweet_id: Option<String>,
 }
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, Serialize, Deserialize, Eq, PartialEq)]
 struct DraftTweet {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub direct_message_deep_link: Option<String>,
@@ -66,7 +66,7 @@ impl<A> TweetBuilder<A>
 where
     A: Authorization,
 {
-    pub fn new(client: &TwitterApi<A>, url: Url) -> Self {
+    pub(crate) fn new(client: &TwitterApi<A>, url: Url) -> Self {
         Self {
             client: client.clone(),
             url,
@@ -85,7 +85,7 @@ where
         self.tweet.for_super_followers_only = Some(for_super_followers_only);
         self
     }
-    pub fn place_id(&mut self, place_id: impl IntoNumericId) -> &mut Self {
+    pub fn place_id(&mut self, place_id: impl IntoStringId) -> &mut Self {
         if let Some(geo) = self.tweet.geo.as_mut() {
             geo.place_id = place_id.into_id();
         } else {
@@ -176,7 +176,7 @@ where
         self.tweet.reply_settings = Some(reply_settings);
         self
     }
-    pub async fn send(&self) -> ApiResult<A, Tweet, Option<()>> {
+    pub async fn send(&self) -> ApiResult<A, Tweet, ()> {
         self.client
             .send(
                 self.client

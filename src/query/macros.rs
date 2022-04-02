@@ -99,6 +99,16 @@ macro_rules! get_req_builder_arg {
             self
         }
     };
+    (limited_tweet_expansions) => {
+        pub fn expansions(
+            &mut self,
+            expansions: impl IntoIterator<Item = $crate::query::LimitedTweetExpansion>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("expansions", expansions);
+            self
+        }
+    };
     (user_expansions) => {
         pub fn expansions(
             &mut self,

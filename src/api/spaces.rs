@@ -7,6 +7,7 @@ use crate::query::{
     GetRelatedTweetsRequestBuilder, GetRelatedUsersRequestBuilder, GetSpacesRequestBuilder,
     GetSpacesSearchRequestBuilder, UrlQueryExt,
 };
+use crate::utils::url;
 
 impl<A> TwitterApi<A>
 where
@@ -21,7 +22,7 @@ where
         GetSpacesRequestBuilder::new(self, url)
     }
     pub fn get_space(&self, id: impl IntoStringId) -> GetSpacesRequestBuilder<A, Space, ()> {
-        GetSpacesRequestBuilder::new(self, self.url(format!("spaces/{id}")).unwrap())
+        GetSpacesRequestBuilder::new(self, self.url(url!("spaces/{}", id)).unwrap())
     }
     pub fn get_spaces_by_creator_ids(
         &self,
@@ -35,13 +36,13 @@ where
         &self,
         id: impl IntoStringId,
     ) -> GetRelatedUsersRequestBuilder<A, Vec<User>, ()> {
-        GetRelatedUsersRequestBuilder::new(self, self.url(format!("spaces/{id}/buyers")).unwrap())
+        GetRelatedUsersRequestBuilder::new(self, self.url(url!("spaces/{}/buyers", id)).unwrap())
     }
     pub fn get_space_tweets(
         &self,
         id: impl IntoStringId,
     ) -> GetRelatedTweetsRequestBuilder<A, Vec<Tweet>, ()> {
-        GetRelatedTweetsRequestBuilder::new(self, self.url(format!("spaces/{id}/tweets")).unwrap())
+        GetRelatedTweetsRequestBuilder::new(self, self.url(url!("spaces/{}/tweets", id)).unwrap())
     }
     pub fn get_spaces_search(
         &self,

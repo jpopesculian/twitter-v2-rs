@@ -36,6 +36,12 @@ pub enum SpaceExpansion {
 
 #[derive(Copy, Clone, Debug, Display)]
 #[strum(serialize_all = "snake_case")]
+pub enum LimitedTweetExpansion {
+    AuthorId,
+}
+
+#[derive(Copy, Clone, Debug, Display)]
+#[strum(serialize_all = "snake_case")]
 pub enum ListExpansion {
     OwnerId,
 }

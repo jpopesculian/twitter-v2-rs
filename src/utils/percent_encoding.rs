@@ -28,3 +28,11 @@ where
 {
     percent_encoding::percent_encode(input.as_ref(), URL)
 }
+
+macro_rules! url {
+    ($fmt_str:literal, $($var:ident),*) => {
+        format!($fmt_str, $($crate::utils::percent_encode(&$var.to_string())),*)
+    }
+}
+
+pub use url;
