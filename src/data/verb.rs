@@ -37,3 +37,4 @@ verb! { pub struct Following { following } }
 verb! { pub struct Blocking { blocking } }
 verb! { pub struct Muting { muting } }
 verb! { pub struct IsMember { is_member } }
+verb! { pub struct Pinned { pinned } }

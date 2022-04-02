@@ -23,3 +23,4 @@ macro_rules! id_req {
 id_req! { pub struct TweetId { tweet_id } }
 id_req! { pub struct TargetUserId { target_user_id } }
 id_req! { pub struct UserId { user_id } }
+id_req! { pub struct ListId { list_id } }

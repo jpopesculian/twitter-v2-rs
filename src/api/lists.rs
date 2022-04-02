@@ -1,14 +1,14 @@
 use super::TwitterApi;
 use crate::api_result::ApiResult;
 use crate::authorization::Authorization;
-use crate::data::{Deleted, IsMember, List, Tweet, Updated, User};
+use crate::data::{Deleted, Following, IsMember, List, Pinned, Tweet, Updated, User};
 use crate::id::IntoNumericId;
 use crate::meta::ResultCountMeta;
 use crate::query::{
     GetLimitedRelatedTweetsRequestBuilder, GetListsRequestBuilder, GetPaginatedListsRequestBuilder,
     GetRelatedUsersRequestBuilder,
 };
-use crate::requests::{ListBuilder, UserId};
+use crate::requests::{ListBuilder, ListId, UserId};
 use reqwest::Method;
 
 impl<A> TwitterApi<A>
@@ -69,7 +69,7 @@ where
         user_id: impl IntoNumericId,
     ) -> ApiResult<A, IsMember, ()> {
         self.send(
-            self.request(Method::DELETE, self.url(format!("lists/{id}/members"))?)
+            self.request(Method::POST, self.url(format!("lists/{id}/members"))?)
                 .json(&UserId::from(user_id)),
         )
         .await
@@ -82,6 +82,74 @@ where
         self.send(self.request(
             Method::DELETE,
             self.url(format!("lists/{id}/members/{user_id}"))?,
+        ))
+        .await
+    }
+    pub fn get_list_followers(
+        &self,
+        id: impl IntoNumericId,
+    ) -> GetRelatedUsersRequestBuilder<A, Vec<User>, ResultCountMeta> {
+        GetRelatedUsersRequestBuilder::new(self, self.url(format!("list/{id}/followers")).unwrap())
+    }
+    pub fn get_user_followed_lists(
+        &self,
+        id: impl IntoNumericId,
+    ) -> GetPaginatedListsRequestBuilder<A, Vec<List>, ResultCountMeta> {
+        GetPaginatedListsRequestBuilder::new(
+            self,
+            self.url(format!("users/{id}/followed_lists")).unwrap(),
+        )
+    }
+    pub async fn post_user_follow_list(
+        &self,
+        id: impl IntoNumericId,
+        list_id: impl IntoNumericId,
+    ) -> ApiResult<A, Following, ()> {
+        self.send(
+            self.request(
+                Method::POST,
+                self.url(format!("users/{id}/followed_lists"))?,
+            )
+            .json(&ListId::from(list_id)),
+        )
+        .await
+    }
+    pub async fn delete_user_follow_list(
+        &self,
+        id: impl IntoNumericId,
+        list_id: impl IntoNumericId,
+    ) -> ApiResult<A, Following, ()> {
+        self.send(self.request(
+            Method::DELETE,
+            self.url(format!("users/{id}/followed_lists/{list_id}"))?,
+        ))
+        .await
+    }
+    pub fn get_user_pinned_lists(
+        &self,
+        id: impl IntoNumericId,
+    ) -> GetListsRequestBuilder<A, Vec<List>, ()> {
+        GetListsRequestBuilder::new(self, self.url(format!("users/{id}/lists")).unwrap())
+    }
+    pub async fn post_user_pinned_list(
+        &self,
+        id: impl IntoNumericId,
+        list_id: impl IntoNumericId,
+    ) -> ApiResult<A, Pinned, ()> {
+        self.send(
+            self.request(Method::POST, self.url(format!("users/{id}/pinned_lists"))?)
+                .json(&ListId::from(list_id)),
+        )
+        .await
+    }
+    pub async fn delete_user_pinned_list(
+        &self,
+        id: impl IntoNumericId,
+        list_id: impl IntoNumericId,
+    ) -> ApiResult<A, Pinned, ()> {
+        self.send(self.request(
+            Method::DELETE,
+            self.url(format!("users/{id}/pinned_lists/{list_id}"))?,
         ))
         .await
     }
