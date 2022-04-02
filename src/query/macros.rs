@@ -79,6 +79,16 @@ macro_rules! get_req_builder_arg {
             self
         }
     };
+    (list_fields) => {
+        pub fn list_fields(
+            &mut self,
+            fields: impl IntoIterator<Item = $crate::query::ListField>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("list.fields", fields);
+            self
+        }
+    };
     (tweet_expansions) => {
         pub fn expansions(
             &mut self,
@@ -103,6 +113,16 @@ macro_rules! get_req_builder_arg {
         pub fn expansions(
             &mut self,
             expansions: impl IntoIterator<Item = $crate::query::SpaceExpansion>,
+        ) -> &mut Self {
+            use $crate::query::UrlQueryExt;
+            self.url.append_query_seq("expansions", expansions);
+            self
+        }
+    };
+    (list_expansions) => {
+        pub fn expansions(
+            &mut self,
+            expansions: impl IntoIterator<Item = $crate::query::ListExpansion>,
         ) -> &mut Self {
             use $crate::query::UrlQueryExt;
             self.url.append_query_seq("expansions", expansions);

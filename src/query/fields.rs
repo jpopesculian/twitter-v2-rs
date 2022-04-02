@@ -113,3 +113,14 @@ pub enum TopicField {
     Name,
     Description,
 }
+
+#[derive(Copy, Clone, Debug, Display)]
+#[strum(serialize_all = "snake_case")]
+pub enum ListField {
+    CreatedAt,
+    FollowerCount,
+    MemberCount,
+    Private,
+    Description,
+    OwnerId,
+}

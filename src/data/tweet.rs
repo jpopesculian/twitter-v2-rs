@@ -61,7 +61,8 @@ pub struct ContextAnnotation {
     pub entity: ContextAnnotationDescription,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct TweetGeo {
     pub place_id: Option<StringId>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -97,7 +98,8 @@ pub enum ReplySettings {
     Followers,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct Tweet {
     pub id: NumericId,
     pub text: String,

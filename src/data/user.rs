@@ -11,7 +11,8 @@ pub struct UserUrlEntites {
     urls: Option<Vec<UrlEntity>>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct UserEntities {
     #[serde(skip_serializing_if = "Option::is_none")]
     url: Option<UserUrlEntites>,
@@ -27,7 +28,8 @@ pub struct UserPublicMetrics {
     listed_count: usize,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct User {
     pub id: NumericId,
     pub name: String,

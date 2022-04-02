@@ -31,6 +31,7 @@ fn tweet_serde() {
     for (path, example) in get_examples("./fixtures/data/tweet") {
         let decoded: Example<Vec<Tweet>> = serde_json::from_value(example.clone())
             .unwrap_or_else(|e| panic!("Could not read example '{}': {}", path.display(), e));
+        #[cfg(feature = "arbitrary_precision")]
         assert_eq!(
             serde_json::to_value(&decoded).unwrap(),
             example,
@@ -45,6 +46,7 @@ fn space_serde() {
     for (path, example) in get_examples("./fixtures/data/space") {
         let decoded: Example<Vec<Space>> = serde_json::from_value(example.clone())
             .unwrap_or_else(|e| panic!("Could not read example '{}': {}", path.display(), e));
+        #[cfg(feature = "arbitrary_precision")]
         assert_eq!(
             serde_json::to_value(&decoded).unwrap(),
             example,

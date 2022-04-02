@@ -15,6 +15,7 @@ categories = ["web-programming::http-client"]
 default = ["oauth2", "rustls-tls"]
 rustls-tls = ["oauth2/rustls-tls", "reqwest/rustls-tls"]
 native-tls = ["oauth2/native-tls", "reqwest/native-tls"]
+arbitrary_precision = ["serde_json/arbitrary_precision"]
 
 [dependencies]
 async-trait = "0.1"
@@ -25,7 +26,7 @@ percent-encoding = "2.1"
 pin-project-lite = "0.2"
 reqwest = { version = "0.11", default-features = false, features = ["json", "stream"] }
 serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0", features = ["arbitrary_precision"] }
+serde_json = "1.0"
 serde_urlencoded = "0.7"
 strum = { version = "0.24", features = ["derive"] }
 thiserror = "1.0"
