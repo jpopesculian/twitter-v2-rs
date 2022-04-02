@@ -1,4 +1,4 @@
-use super::entity::Entities;
+use super::entity::FullTextEntities;
 use super::withheld::Withheld;
 use super::GeoCoordinates;
 use crate::id::{NumericId, StringId};
@@ -61,7 +61,7 @@ pub struct ContextAnnotation {
     pub entity: ContextAnnotationDescription,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TweetGeo {
     pub place_id: Option<StringId>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -97,7 +97,7 @@ pub enum ReplySettings {
     Followers,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Tweet {
     pub id: NumericId,
     pub text: String,
@@ -116,7 +116,7 @@ pub struct Tweet {
     )]
     pub created_at: Option<OffsetDateTime>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub entities: Option<Entities>,
+    pub entities: Option<FullTextEntities>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub geo: Option<TweetGeo>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -1,3 +1,4 @@
+use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
@@ -10,14 +11,17 @@ pub struct Example<T> {
     includes: Option<Expansions>,
 }
 
-fn get_examples(path: impl AsRef<Path>) -> impl Iterator<Item = (PathBuf, File)> {
+fn get_examples(path: impl AsRef<Path>) -> impl Iterator<Item = (PathBuf, serde_json::Value)> {
     fs::read_dir(path.as_ref())
         .unwrap_or_else(|e| panic!("could not open '{}': {}", path.as_ref().display(), e))
         .map(|entry| entry.expect("invalid directory entry"))
         .map(|entry| {
             (
                 entry.path(),
-                File::open(entry.path()).expect("could not open file entry"),
+                serde_json::from_reader(
+                    File::open(entry.path()).expect("could not open file entry"),
+                )
+                .expect("could not read json"),
             )
         })
 }
@@ -25,15 +29,27 @@ fn get_examples(path: impl AsRef<Path>) -> impl Iterator<Item = (PathBuf, File)>
 #[test]
 fn tweet_serde() {
     for (path, example) in get_examples("./fixtures/data/tweet") {
-        let _ = serde_json::from_reader::<_, Example<Vec<Tweet>>>(example)
+        let decoded: Example<Vec<Tweet>> = serde_json::from_value(example.clone())
             .unwrap_or_else(|e| panic!("Could not read example '{}': {}", path.display(), e));
+        assert_eq!(
+            serde_json::to_value(&decoded).unwrap(),
+            example,
+            "{}",
+            path.display()
+        );
     }
 }
 
 #[test]
 fn space_serde() {
     for (path, example) in get_examples("./fixtures/data/space") {
-        let _ = serde_json::from_reader::<_, Example<Vec<Space>>>(example)
+        let decoded: Example<Vec<Space>> = serde_json::from_value(example.clone())
             .unwrap_or_else(|e| panic!("Could not read example '{}': {}", path.display(), e));
+        assert_eq!(
+            serde_json::to_value(&decoded).unwrap(),
+            example,
+            "{}",
+            path.display()
+        );
     }
 }

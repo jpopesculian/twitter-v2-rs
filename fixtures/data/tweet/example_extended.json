@@ -45,7 +45,7 @@
         ]
       },
       "text": "The hide replies endpoint is launching today! \n\nDevelopers can hide replies to Tweets - a crucial way developers can help improve the health of the public conversation using the #TwitterAPI.\n\nhttps://t.co/khXhTurm9x",
-      "created_at": "2020-08-19T16:26:16.000Z",
+      "created_at": "2020-08-19T16:26:16Z",
       "context_annotations": [
         {
           "domain": {
@@ -80,7 +80,7 @@
   "includes": {
     "users": [
       {
-        "created_at": "2013-12-14T04:35:55.000Z",
+        "created_at": "2013-12-14T04:35:55Z",
         "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
         "entities": {
           "url": {

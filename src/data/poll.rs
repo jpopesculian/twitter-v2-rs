@@ -32,4 +32,6 @@ pub struct Poll {
         skip_serializing_if = "Option::is_none"
     )]
     pub end_datetime: Option<OffsetDateTime>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub voting_status: Option<PollVotingStatus>,
 }

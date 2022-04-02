@@ -66,7 +66,7 @@ pub mod option_duration_ms {
         serializer: S,
     ) -> Result<S::Ok, S::Error> {
         duration
-            .map(Duration::whole_milliseconds)
+            .map(|d| Duration::whole_milliseconds(d) as i64)
             .serialize(serializer)
     }
 

@@ -35,7 +35,7 @@
         ]
       },
       "text": "RT @suhemparack: I built an Alexa Skill for Twitter using APL that allows you to view Tweets and Trends on the echo show!\n\nCheck it out her…",
-      "created_at": "2020-02-18T19:33:59.000Z",
+      "created_at": "2020-02-18T19:33:59Z",
       "possibly_sensitive": false,
       "author_id": "2244994945",
       "referenced_tweets": [
@@ -140,7 +140,7 @@
           "listed_count": 1672
         },
         "pinned_tweet_id": "1293593516040269825",
-        "created_at": "2013-12-14T04:35:55.000Z",
+        "created_at": "2013-12-14T04:35:55Z",
         "protected": false
       },
       {
@@ -181,7 +181,7 @@
           "listed_count": 12
         },
         "pinned_tweet_id": "1296498078233571329",
-        "created_at": "2017-04-27T20:56:22.000Z",
+        "created_at": "2017-04-27T20:56:22Z",
         "protected": false
       }
     ],
@@ -225,7 +225,7 @@
           ]
         },
         "text": "I built an Alexa Skill for Twitter using APL that allows you to view Tweets and Trends on the echo show!\n\nCheck it out here 👇\n\nhttps://t.co/l5J8wq748G",
-        "created_at": "2020-02-18T19:01:58.000Z",
+        "created_at": "2020-02-18T19:01:58Z",
         "possibly_sensitive": false,
         "author_id": "857699969263964161",
         "context_annotations": [

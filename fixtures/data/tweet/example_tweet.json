@@ -39,7 +39,7 @@
       },
       "text": "Here’s an article that highlights the updates in the new Tweet payload v2 https://t.co/oeF3ZHeKQQ",
       "in_reply_to_user_id": "2244994945",
-      "created_at": "2020-09-18T18:36:15.000Z",
+      "created_at": "2020-09-18T18:36:15Z",
       "author_id": "2244994945",
       "referenced_tweets": [
         {
@@ -54,7 +54,7 @@
   "includes": {
     "users": [
       {
-        "created_at": "2013-12-14T04:35:55.000Z",
+        "created_at": "2013-12-14T04:35:55Z",
         "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
         "entities": {
           "url": {
@@ -142,7 +142,7 @@
           ]
         },
         "text": "The new #TwitterAPI includes some improvements to the Tweet payload. You’re probably wondering — what are the main differences? 🧐\n\nIn this video, @SuhemParack compares the v1.1 Tweet payload with what you’ll find using our v2 endpoints. https://t.co/CjneyMpgCq",
-        "created_at": "2020-09-10T17:01:37.000Z",
+        "created_at": "2020-09-10T17:01:37Z",
         "author_id": "2244994945",
         "lang": "en",
         "source": "Twitter Media Studio"

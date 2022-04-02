@@ -1,9 +1,23 @@
-use super::entity::Entities;
+use super::entity::{FullTextEntities, UrlEntity};
 use super::withheld::Withheld;
 use crate::id::NumericId;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use url::Url;
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct UserUrlEntites {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    urls: Option<Vec<UrlEntity>>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct UserEntities {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    url: Option<UserUrlEntites>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<FullTextEntities>,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UserPublicMetrics {
@@ -13,7 +27,7 @@ pub struct UserPublicMetrics {
     listed_count: usize,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct User {
     pub id: NumericId,
     pub name: String,
@@ -27,7 +41,7 @@ pub struct User {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub entities: Option<Entities>,
+    pub entities: Option<UserEntities>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

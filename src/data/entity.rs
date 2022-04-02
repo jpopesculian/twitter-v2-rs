@@ -1,5 +1,6 @@
 use crate::id::NumericId;
 use serde::{Deserialize, Serialize};
+use serde_json::Number;
 use url::Url;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
@@ -35,11 +36,11 @@ pub struct HashtagEntity {
     pub tag: String,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AnnotationEntity {
     pub start: usize,
     pub end: usize,
-    pub probability: f32,
+    pub probability: Number,
     #[serde(rename = "type")]
     pub kind: String,
     pub normalized_text: String,
@@ -61,8 +62,8 @@ pub struct MentionEntity {
     pub id: Option<NumericId>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct Entities {
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FullTextEntities {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub urls: Option<Vec<UrlEntity>>,
     #[serde(skip_serializing_if = "Option::is_none")]

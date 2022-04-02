@@ -17,7 +17,7 @@ pub struct SpaceTopic {
     pub description: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Space {
     pub id: StringId,
     pub state: SpaceState,
