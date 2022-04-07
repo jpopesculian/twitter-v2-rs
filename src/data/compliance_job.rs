@@ -20,18 +20,19 @@ pub enum ComplianceJobKind {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct ComplianceJob {
-    id: NumericId,
+    pub id: NumericId,
     #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
+    pub name: Option<String>,
     #[serde(rename = "type")]
-    kind: ComplianceJobKind,
-    status: Option<ComplianceJobStatus>,
+    pub kind: ComplianceJobKind,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<ComplianceJobStatus>,
     #[serde(with = "time::serde::rfc3339")]
-    created_at: OffsetDateTime,
-    upload_url: Url,
+    pub created_at: OffsetDateTime,
+    pub upload_url: Url,
     #[serde(with = "time::serde::rfc3339")]
-    upload_expires_at: OffsetDateTime,
-    download_url: Url,
+    pub upload_expires_at: OffsetDateTime,
+    pub download_url: Url,
     #[serde(with = "time::serde::rfc3339")]
-    download_expires_at: OffsetDateTime,
+    pub download_expires_at: OffsetDateTime,
 }

@@ -21,7 +21,9 @@ fn get_examples(path: impl AsRef<Path>) -> impl Iterator<Item = (PathBuf, serde_
                 serde_json::from_reader(
                     File::open(entry.path()).expect("could not open file entry"),
                 )
-                .expect("could not read json"),
+                .unwrap_or_else(|e| {
+                    panic!("could not read json {}: {}", entry.path().display(), e)
+                }),
             )
         })
 }

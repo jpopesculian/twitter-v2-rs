@@ -1,0 +1,137 @@
+{
+  "data": [
+    {
+      "lang": "en",
+      "conversation_id": "1293593516040269825",
+      "text": "It’s finally here! 🥁 Say hello to the new #TwitterAPI.\n\nWe’re rebuilding the Twitter API v2 from the ground up to better serve our developer community. And today’s launch is only the beginning.\n\nhttps://t.co/32VrwpGaJw https://t.co/KaFSbjWUA8",
+      "attachments": {
+        "media_keys": [
+          "7_1293565706408038401"
+        ]
+      },
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 78,
+            "end": 88,
+            "probability": 0.4381,
+            "type": "Product",
+            "normalized_text": "Twitter API"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 42,
+            "end": 53,
+            "tag": "TwitterAPI"
+          }
+        ],
+        "urls": [
+          {
+            "start": 195,
+            "end": 218,
+            "url": "https://t.co/32VrwpGaJw",
+            "expanded_url": "https://blog.twitter.com/developer/en_us/topics/tools/2020/introducing_new_twitter_api.html",
+            "display_url": "blog.twitter.com/developer/en_u…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1336475659279818754/_cmRh7QE?format=jpg&name=orig",
+                "width": 1200,
+                "height": 627
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1336475659279818754/_cmRh7QE?format=jpg&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "Introducing a new and improved Twitter API",
+            "description": "Introducing the new Twitter API - rebuilt from the ground up to deliver new features faster so developers can help the world connect to the public conversation happening on Twitter.",
+            "unwound_url": "https://blog.twitter.com/developer/en_us/topics/tools/2020/introducing_new_twitter_api.html"
+          },
+          {
+            "start": 219,
+            "end": 242,
+            "url": "https://t.co/KaFSbjWUA8",
+            "expanded_url": "https://twitter.com/TwitterDev/status/1293593516040269825/video/1",
+            "display_url": "pic.twitter.com/KaFSbjWUA8"
+          }
+        ]
+      },
+      "id": "1293593516040269825",
+      "public_metrics": {
+        "retweet_count": 958,
+        "reply_count": 171,
+        "like_count": 2848,
+        "quote_count": 333
+      },
+      "author_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "Categories within Brand Verticals that narrow down the scope of Brands"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "Services"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "Brands and Companies"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "Top level interests and hobbies groupings, like Food or Travel"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "Technology",
+            "description": "Technology and computing"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "Computer programming",
+            "description": "Computer programming"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "created_at": "2020-08-12T17:01:42Z"
+    }
+  ],
+  "includes": {
+    "media": [
+      {
+        "height": 720,
+        "media_key": "7_1293565706408038401",
+        "type": "photo",
+        "preview_image_url": "https://pbs.twimg.com/ext_tw_video_thumb/1293565706408038401/pu/img/66P2dvbU4a02jYbV.jpg",
+        "public_metrics": {
+          "view_count": 279438
+        },
+        "width": 1280
+      }
+    ]
+  }
+}

@@ -59,7 +59,8 @@ pub struct Media {
     #[serde(
         with = "crate::utils::serde::option_duration_ms",
         rename = "duration_ms",
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        default
     )]
     pub duration: Option<Duration>,
     #[serde(skip_serializing_if = "Option::is_none")]

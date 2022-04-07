@@ -23,7 +23,8 @@ pub struct Poll {
     #[serde(
         with = "crate::utils::serde::option_duration_mins",
         rename = "duration_minutes",
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        default
     )]
     pub duration: Option<Duration>,
     #[serde(
