@@ -61,7 +61,7 @@ where
         &self,
         id: impl IntoNumericId,
     ) -> GetRelatedUsersRequestBuilder<A, Vec<User>, ResultCountMeta> {
-        GetRelatedUsersRequestBuilder::new(self, self.url(format!("list/{id}/members")).unwrap())
+        GetRelatedUsersRequestBuilder::new(self, self.url(format!("lists/{id}/members")).unwrap())
     }
     pub async fn post_list_member(
         &self,
@@ -89,7 +89,7 @@ where
         &self,
         id: impl IntoNumericId,
     ) -> GetRelatedUsersRequestBuilder<A, Vec<User>, ResultCountMeta> {
-        GetRelatedUsersRequestBuilder::new(self, self.url(format!("list/{id}/followers")).unwrap())
+        GetRelatedUsersRequestBuilder::new(self, self.url(format!("lists/{id}/followers")).unwrap())
     }
     pub fn get_user_followed_lists(
         &self,
