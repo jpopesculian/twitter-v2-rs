@@ -73,3 +73,23 @@ async fn get_list_tweets() -> Result<()> {
         .await?;
     Ok(())
 }
+
+#[tokio::test]
+async fn get_list_members() -> Result<()> {
+    let _ = get_api_user_ctx()
+        .await
+        .get_list_members(84839422)
+        .send()
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn get_list_followers() -> Result<()> {
+    let _ = get_api_user_ctx()
+        .await
+        .get_list_followers(84839422)
+        .send()
+        .await?;
+    Ok(())
+}
