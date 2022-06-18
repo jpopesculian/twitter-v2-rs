@@ -8,24 +8,24 @@ use url::Url;
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UserUrlEntites {
     #[serde(skip_serializing_if = "Option::is_none")]
-    urls: Option<Vec<UrlEntity>>,
+    pub urls: Option<Vec<UrlEntity>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct UserEntities {
     #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<UserUrlEntites>,
+    pub url: Option<UserUrlEntites>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<FullTextEntities>,
+    pub description: Option<FullTextEntities>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UserPublicMetrics {
-    followers_count: usize,
-    following_count: usize,
-    tweet_count: usize,
-    listed_count: usize,
+    pub followers_count: usize,
+    pub following_count: usize,
+    pub tweet_count: usize,
+    pub listed_count: usize,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
