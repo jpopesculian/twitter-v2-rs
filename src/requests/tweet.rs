@@ -161,13 +161,13 @@ where
         }
         self
     }
-    pub fn in_reply_to_tweet_id(&mut self, user_id: impl IntoNumericId) -> &mut Self {
+    pub fn in_reply_to_tweet_id(&mut self, tweet_id: impl IntoNumericId) -> &mut Self {
         if let Some(reply) = self.tweet.reply.as_mut() {
-            reply.in_reply_to_tweet_id = Some(user_id.to_string());
+            reply.in_reply_to_tweet_id = Some(tweet_id.to_string());
         } else {
             self.tweet.reply = Some(DraftTweetReply {
                 exclude_reply_user_ids: None,
-                in_reply_to_tweet_id: Some(user_id.to_string()),
+                in_reply_to_tweet_id: Some(tweet_id.to_string()),
             });
         }
         self
