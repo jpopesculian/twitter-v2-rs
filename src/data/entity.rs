@@ -41,7 +41,7 @@ pub struct HashtagEntity {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct AnnotationEntity {
-    pub start: usize,
+    pub start: isize,
     pub end: usize,
     #[cfg(feature = "arbitrary_precision")]
     pub probability: Number,
