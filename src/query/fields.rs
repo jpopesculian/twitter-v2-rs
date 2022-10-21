@@ -15,6 +15,7 @@ pub enum MediaField {
     OrganicMetrics,
     PromotedMetrics,
     AltText,
+    Variants
 }
 
 #[derive(Copy, Clone, Debug, Display)]
