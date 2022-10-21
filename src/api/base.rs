@@ -21,7 +21,7 @@ where
 {
     pub fn new(auth: A) -> Self {
         Self {
-            client: Client::new(),
+            client: Client::builder().pool_max_idle_per_host(0).build().unwrap(),
             base_url: Url::parse("https://api.twitter.com/2/").unwrap(),
             auth: Arc::new(auth),
         }
