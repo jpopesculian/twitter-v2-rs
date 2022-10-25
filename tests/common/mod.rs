@@ -1,5 +1,5 @@
 use std::ops::Deref;
-use std::sync::Mutex;
+use tokio::sync::Mutex;
 use twitter_v2::authorization::{BearerToken, Oauth2Client, Oauth2Token};
 use twitter_v2::TwitterApi;
 
@@ -13,9 +13,9 @@ async fn get_token() -> Oauth2Token {
     let oauth2_client = Oauth2Client::new(
         std::env::var("CLIENT_ID").expect("could not find CLIENT_ID"),
         std::env::var("CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
-        "http://localhost:3000/callback".parse().unwrap(),
+        "http://127.0.0.1:3000/callback".parse().unwrap(),
     );
-    let mut token = OAUTH2_TOKEN.lock().unwrap();
+    let mut token = OAUTH2_TOKEN.lock().await;
     if oauth2_client
         .refresh_token_if_expired(&mut token)
         .await

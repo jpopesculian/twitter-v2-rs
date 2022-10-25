@@ -62,12 +62,12 @@ impl PartialEq<String> for StringId {
 }
 impl PartialEq<str> for StringId {
     fn eq(&self, other: &str) -> bool {
-        &self.0 == other
+        self.0 == other
     }
 }
 impl PartialEq<&str> for StringId {
     fn eq(&self, other: &&str) -> bool {
-        &self.0 == *other
+        self.0 == *other
     }
 }
 
