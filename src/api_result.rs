@@ -1,6 +1,6 @@
 use crate::api::TwitterApi;
 use crate::authorization::Authorization;
-use crate::data::Expansions;
+use crate::data::{Expansions, MatchingRule};
 use crate::error::{Error, Result};
 use crate::meta::PaginationMeta;
 use crate::query::UrlQueryExt;
@@ -21,6 +21,8 @@ pub struct ApiPayload<T, M> {
     pub includes: Option<Expansions>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub errors: Option<Vec<ApiError>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub matching_rules: Option<Vec<MatchingRule>>,
 }
 
 impl<T, M> ApiPayload<T, M> {
@@ -36,6 +38,9 @@ impl<T, M> ApiPayload<T, M> {
     pub fn errors(&self) -> Option<&[ApiError]> {
         self.errors.as_deref()
     }
+    pub fn matching_rules(&self) -> Option<&[MatchingRule]> {
+        self.matching_rules.as_deref()
+    }
     pub fn into_data(self) -> Option<T> {
         self.data
     }
@@ -47,6 +52,9 @@ impl<T, M> ApiPayload<T, M> {
     }
     pub fn into_errors(self) -> Option<Vec<ApiError>> {
         self.errors
+    }
+    pub fn into_matching_rules(self) -> Option<Vec<MatchingRule>> {
+        self.matching_rules
     }
 }
 
