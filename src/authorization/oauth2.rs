@@ -87,11 +87,25 @@ impl From<Scope> for oauth2::Scope {
 pub struct Oauth2Client(BasicClient);
 
 impl Oauth2Client {
+    /// Create a new private client, authorized with client secret.
     pub fn new(client_id: impl ToString, client_secret: impl ToString, callback_url: Url) -> Self {
+        Self::new_impl(client_id, Some(client_secret), callback_url)
+    }
+
+    /// Create a new public client, not authorized with client secret.
+    pub fn new_public(client_id: impl ToString, callback_url: Url) -> Self {
+        Self::new_impl(client_id, None::<String>, callback_url)
+    }
+
+    fn new_impl(
+        client_id: impl ToString,
+        client_secret: Option<impl ToString>,
+        callback_url: Url,
+    ) -> Self {
         Self(
             BasicClient::new(
                 ClientId::new(client_id.to_string()),
-                Some(ClientSecret::new(client_secret.to_string())),
+                client_secret.map(|client_secret| ClientSecret::new(client_secret.to_string())),
                 AuthUrl::from_url("https://twitter.com/i/oauth2/authorize".parse().unwrap()),
                 Some(TokenUrl::from_url(
                     "https://api.twitter.com/2/oauth2/token".parse().unwrap(),
