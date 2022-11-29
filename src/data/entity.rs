@@ -14,11 +14,15 @@ pub struct UrlImage {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 pub struct UrlEntity {
-    pub start: usize,
-    pub end: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end: Option<usize>,
     pub url: String,
-    pub expanded_url: String,
-    pub display_url: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expanded_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub display_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub images: Option<Vec<UrlImage>>,
     #[serde(skip_serializing_if = "Option::is_none")]
