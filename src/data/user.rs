@@ -28,19 +28,6 @@ pub struct UserPublicMetrics {
     pub listed_count: usize,
 }
 
-fn empty_string_is_none<'de, D>(deserializer: D) -> Result<Option<Url>, D::Error>
-where
-    D: serde::Deserializer<'de>,
-{
-    match Option::<&str>::deserialize(deserializer)? {
-        Some(s) if s.is_empty() => Ok(None),
-        Some(s) => Url::parse(s)
-            .map(Option::Some)
-            .map_err(serde::de::Error::custom),
-        None => Ok(None),
-    }
-}
-
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct User {
@@ -64,7 +51,7 @@ pub struct User {
     #[serde(
         default,
         skip_serializing_if = "Option::is_none",
-        deserialize_with = "empty_string_is_none"
+        deserialize_with = "crate::utils::serde::empty_string_is_none"
     )]
     pub profile_image_url: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
