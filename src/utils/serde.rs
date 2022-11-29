@@ -97,3 +97,19 @@ pub mod option_duration_mins {
         Ok(Option::<i64>::deserialize(deserializer)?.map(Duration::minutes))
     }
 }
+
+pub fn empty_string_is_none<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: std::str::FromStr,
+    T::Err: std::fmt::Display,
+{
+    match Option::<&str>::deserialize(deserializer)? {
+        Some(s) if s.is_empty() => Ok(None),
+        Some(s) => s
+            .parse()
+            .map(Option::Some)
+            .map_err(serde::de::Error::custom),
+        None => Ok(None),
+    }
+}

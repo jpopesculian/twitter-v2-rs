@@ -48,7 +48,11 @@ pub struct User {
     pub location: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pinned_tweet_id: Option<NumericId>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::utils::serde::empty_string_is_none"
+    )]
     pub profile_image_url: Option<Url>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub protected: Option<bool>,
