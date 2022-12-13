@@ -98,6 +98,14 @@ pub enum ReplySettings {
     Followers,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
+pub struct EditControls {
+    #[serde(with = "time::serde::rfc3339")]
+    pub editable_until: OffsetDateTime,
+    pub edits_remaining: usize,
+    pub is_edit_eligible: bool,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(feature = "arbitrary_precision", derive(Eq))]
 pub struct Tweet {
@@ -117,6 +125,8 @@ pub struct Tweet {
         skip_serializing_if = "Option::is_none"
     )]
     pub created_at: Option<OffsetDateTime>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub edit_controls: Option<EditControls>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub entities: Option<FullTextEntities>,
     #[serde(skip_serializing_if = "Option::is_none")]
