@@ -49,6 +49,7 @@ pub enum TweetField {
     ContextAnnotations,
     ConversationId,
     CreatedAt,
+    EditControls,
     Entities,
     Geo,
     Id,
